@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>OMC Footwear - Production TV Display System (8 TVs: DIP, Lasting & Sewing)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts for Factory Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDKs for Real-Time Multi-Device Cloud Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+  
+  <style>
+    :root {
+      --header-font-scale: 1;
+      --board-font-scale: 1;
+    }
+
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-board {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    .font-num {
+      font-family: 'Oswald', 'Inter', sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    /* Industrial High-Contrast TV Colors matching Factory Board */
+    .bg-prod-red { background-color: #ff0000; }
+    .bg-ie-blue { background-color: #3b68c4; }
+    .bg-quality-yellow { background-color: #ffee00; }
+    .bg-maint-cyan { background-color: #00b0f0; }
+    .bg-row-alt { background-color: #dbe3f0; }
+    
+    /* Responsive UNIFIED 7-COLUMN FACTORY ANDON GRID */
+    .andon-grid {
+      display: grid;
+      grid-template-columns: 10% 15% 15% 17% 15% 14% 14%;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .andon-grid > div {
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    /* Absolute No-Scroll Guarantee for TV screens */
+    .tv-lock-screen {
+      height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
+    }
+
+    /* Hide scrollbars gracefully on display mode while keeping scrolling enabled */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Smooth touch momentum */
+    .touch-scroll {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    /* Prevent auto-zoom on iOS when tapping input fields */
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+    
+    @keyframes pulse-gentle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .pulse-emoji {
+      animation: pulse-gentle 2s infinite ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 8-Second Refresh Linear Bar Animation */
+    @keyframes refreshTicker {
+      0% { width: 0%; opacity: 0.8; }
+      90% { width: 98%; opacity: 0.8; }
+      100% { width: 100%; opacity: 0.3; }
+    }
+    .animate-refresh-bar {
+      animation: refreshTicker 8s linear infinite;
+    }
+
+    /* Portrait TV helper prompt */
+    @media (orientation: portrait) and (max-width: 768px) {
+      .tv-rotate-hint {
+        display: flex !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-full flex flex-col antialiased">
+
+  <header id="mainNav" class="bg-slate-800/95 backdrop-blur border-b border-slate-700 px-3 sm:px-4 py-2 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-[1920px] mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+      
+      <!-- Top Row on Mobile: Logo, Title & Compact Action Icons -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="bg-white px-2 py-1 rounded-lg border border-slate-300 flex items-center shadow-sm shrink-0">
+            <div id="navLogoPlaceholder" class="h-6 sm:h-7 w-auto flex items-center">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-white tracking-wide truncate">OMC FOOTWEAR</h1>
+              <span class="text-[9px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded tracking-wider uppercase">8-TV ANDON</span>
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-400 truncate hidden xs:block">Realtime Sync (2 DIP, 2 Lasting, 4 Sewing)</p>
+          </div>
+        </div>
+
+        <!-- Quick Status & Mobile Menu Toggle -->
+        <div class="flex items-center gap-1.5 md:hidden">
+          <button onclick="openCloudModal()" class="p-1.5 rounded-lg bg-emerald-950 border border-emerald-600 text-emerald-400 text-xs flex items-center gap-1" title="Cloud Sync Status">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="text-[10px] font-bold">Live</span>
+          </button>
+
+          <button onclick="toggleFullscreen()" class="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs" title="Toggle Fullscreen">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+          </button>
+
+          <div class="px-2 py-1 bg-slate-950 border border-slate-700 text-emerald-400 font-mono text-[10px] rounded-lg font-bold">
+            <span class="tv-live-clock">--:-- --</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-scroll py-0.5 max-w-full">
+        <div class="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-700/80 text-[11px] font-semibold shrink-0">
+          <button onclick="switchView('entry')" id="btn-entry" class="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white shadow transition-all whitespace-nowrap active:scale-95">
+            📝 Master Entry
+          </button>
+          <button onclick="switchView('multi')" id="btn-multi" class="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap active:scale-95">
+            🖥️ 8-TV Grid
+          </button>
+          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+          
+          <button onclick="switchView('tv1')" id="btn-tv1" class="px-2 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
+            TV1 <span class="hidden sm:inline">(DIP-1)</span>
+          </button>
+          <button onclick="switchView('tv2')" id="btn-tv2" class="px-2 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
+            TV2 <span class="hidden sm:inline">(DIP-2)</span>
+          </button>
+          <button onclick="switchView('tv3')" id="btn-tv3" class="px-2 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
+            TV3 <span class="hidden sm:inline">(Sew-1)</span>
+          </button>
+          <button onclick="switchView('tv4')" id="btn-tv4" class="px-2 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
+            TV4 <span class="hidden sm:inline">(Sew-2)</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+          <button onclick="switchView('tv5')" id="btn-tv5" class="px-2 py-1.5 rounded-lg text-amber-300 hover:text-amber-100 hover:bg-amber-950/60 border border-amber-800/40 transition-all whitespace-nowrap font-bold">
+            TV5 <span class="hidden sm:inline">(Last-1)</span>
+          </button>
+          <button onclick="switchView('tv6')" id="btn-tv6" class="px-2 py-1.5 rounded-lg text-amber-300 hover:text-amber-100 hover:bg-amber-950/60 border border-amber-800/40 transition-all whitespace-nowrap font-bold">
+            TV6 <span class="hidden sm:inline">(Last-2)</span>
+          </button>
+          <button onclick="switchView('tv7')" id="btn-tv7" class="px-2 py-1.5 rounded-lg text-emerald-300 hover:text-emerald-100 hover:bg-emerald-950/60 border border-emerald-800/40 transition-all whitespace-nowrap font-bold">
+            TV7 <span class="hidden sm:inline">(Sew-3)</span>
+          </button>
+          <button onclick="switchView('tv8')" id="btn-tv8" class="px-2 py-1.5 rounded-lg text-emerald-300 hover:text-emerald-100 hover:bg-emerald-950/60 border border-emerald-800/40 transition-all whitespace-nowrap font-bold">
+            TV8 <span class="hidden sm:inline">(Sew-4)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Controls: Cloud Status, Fullscreen & 12-Hour AM/PM Clock (Desktop/Tablet) -->
+      <div class="hidden md:flex items-center gap-2 shrink-0">
+        <button onclick="openCloudModal()" id="cloudStatusBtn" class="px-3 py-1.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-500 text-emerald-300 font-mono text-[11px] rounded-lg font-bold flex items-center gap-1.5 shadow transition" title="Connected to OMC Realtime Database">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="cloudStatusLabel">Cloud: Live Sync 🟢</span>
+        </button>
+
+        <button onclick="toggleFullscreen()" class="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs rounded-lg font-medium transition flex items-center gap-1.5" title="Toggle Fullscreen">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+          <span class="hidden lg:inline">Fullscreen</span>
+        </button>
+
+        <div id="liveClock" class="px-2.5 py-1.5 bg-slate-950 border border-slate-700 text-emerald-400 font-mono text-xs rounded-lg font-bold tracking-wide">
+          --:--:-- --
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 p-2 sm:p-4 flex flex-col min-h-0 w-full">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: MASTER DATA ENTRY SHEET (RESPONSIVE FOR MOBILE & PC)   -->
+    <!-- ============================================================== -->
+    <section id="view-entry" class="max-w-7xl w-full mx-auto space-y-4 sm:space-y-5 pb-8">
+      
+      <!-- Top Overview Card -->
+      <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3.5 sm:p-5 shadow-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div class="hidden sm:flex p-2 bg-white rounded-xl shadow-md shrink-0">
+            <div id="entryLogoPreview" class="h-9 w-24 flex items-center justify-center">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-base sm:text-lg lg:text-xl font-extrabold text-white flex items-center gap-2 flex-wrap">
+              <span>📊 OMC Central Floor Master Entry</span>
+              <span id="cloudEntryBadge" class="text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 cursor-pointer whitespace-nowrap" onclick="openCloudModal()">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>OMC Static Cloud Live</span>
+              </span>
+            </h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">
+              Configure 8 Factory Floor Displays: <strong>2 DIP</strong>, <strong>2 Lasting</strong>, and <strong>4 Sewing</strong> sections with auto-scaling layout.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Launch Standalone TV Windows (Responsive Grid) -->
+        <div class="w-full lg:w-auto">
+          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Open Individual TV Browser Windows:</div>
+          <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 w-full lg:w-auto">
+            <button onclick="openStandaloneTV('tv1')" class="px-2 py-1.5 bg-red-600/90 hover:bg-red-500 text-white rounded text-[10px] font-bold text-center truncate">TV 1 (DIP)</button>
+            <button onclick="openStandaloneTV('tv2')" class="px-2 py-1.5 bg-red-600/90 hover:bg-red-500 text-white rounded text-[10px] font-bold text-center truncate">TV 2 (DIP)</button>
+            <button onclick="openStandaloneTV('tv5')" class="px-2 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded text-[10px] font-bold text-center truncate">TV 5 (Last)</button>
+            <button onclick="openStandaloneTV('tv6')" class="px-2 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded text-[10px] font-bold text-center truncate">TV 6 (Last)</button>
+            <button onclick="openStandaloneTV('tv3')" class="px-2 py-1.5 bg-blue-600/90 hover:bg-blue-500 text-white rounded text-[10px] font-bold text-center truncate">TV 3 (Sew)</button>
+            <button onclick="openStandaloneTV('tv4')" class="px-2 py-1.5 bg-blue-600/90 hover:bg-blue-500 text-white rounded text-[10px] font-bold text-center truncate">TV 4 (Sew)</button>
+            <button onclick="openStandaloneTV('tv7')" class="px-2 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold text-center truncate">TV 7 (Sew)</button>
+            <button onclick="openStandaloneTV('tv8')" class="px-2 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold text-center truncate">TV 8 (Sew)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-md">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-bold text-slate-300 whitespace-nowrap">📅 Date:</span>
+            <input type="date" id="activeDateSelector" onchange="onDatePickerChange(this.value)" class="bg-slate-900 border border-slate-600 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
+          </div>
+          
+          <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs">
+            <button onclick="selectQuickDate('today')" id="btn-date-today" class="px-2.5 py-1 rounded font-bold bg-blue-600 text-white transition">Today</button>
+            <button onclick="selectQuickDate('yesterday')" id="btn-date-yesterday" class="px-2.5 py-1 rounded font-semibold text-slate-300 hover:text-white transition">Yesterday</button>
+          </div>
+
+          <button onclick="openCalendarModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs rounded-lg font-semibold transition flex items-center gap-1">
+            🗂️ Calendar
+          </button>
+          
+          <button onclick="copyFromPreviousDay()" class="px-3 py-1.5 bg-indigo-600/80 hover:bg-indigo-600 text-white text-xs rounded-lg font-semibold transition flex items-center gap-1" title="Copy line structure and plan targets from yesterday across all 8 TVs">
+            📋 Copy Previous
+          </button>
+        </div>
+
+        <div id="dateStatusBadge" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-700 text-emerald-400 flex items-center justify-center gap-1.5 self-start md:self-auto">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="dateStatusText">Today's Live Floor</span>
+        </div>
+      </div>
+
+      <div class="flex border-b border-slate-700 space-x-1 sm:space-x-1.5 overflow-x-auto no-scrollbar touch-scroll pb-1">
+        <button onclick="selectEntryTab(1)" id="tab-btn-1" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-red-500 text-red-400 bg-slate-800/60 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 1: DIP 1</span>
+        </button>
+        <button onclick="selectEntryTab(2)" id="tab-btn-2" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 2: DIP 2</span>
+        </button>
+        <button onclick="selectEntryTab(3)" id="tab-btn-3" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 3: Sewing 1</span>
+        </button>
+        <button onclick="selectEntryTab(4)" id="tab-btn-4" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 4: Sewing 2</span>
+        </button>
+        <button onclick="selectEntryTab(5)" id="tab-btn-5" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-amber-400 hover:text-amber-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 5: Lasting 1</span>
+        </button>
+        <button onclick="selectEntryTab(6)" id="tab-btn-6" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-amber-400 hover:text-amber-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 6: Lasting 2</span>
+        </button>
+        <button onclick="selectEntryTab(7)" id="tab-btn-7" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-emerald-400 hover:text-emerald-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 7: Sewing 3</span>
+        </button>
+        <button onclick="selectEntryTab(8)" id="tab-btn-8" class="px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-emerald-400 hover:text-emerald-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap">
+          <span>TV 8: Sewing 4</span>
+        </button>
+      </div>
+
+      <!-- Main Form Card -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 sm:p-6 shadow-xl space-y-5">
+        
+        <!-- Board Meta Controls Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pb-4 border-b border-slate-700">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Display Title / Section</label>
+            <input type="text" id="entry-title" onchange="autoSave()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm font-semibold focus:outline-none focus:border-blue-500" placeholder="Production Sewing / Lasting / DIP">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Current Production Hour</label>
+            <div class="flex items-center space-x-2">
+              <input type="text" id="entry-hour" onchange="autoSave()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white font-bold text-sm focus:outline-none focus:border-blue-500" placeholder="8h">
+              <select onchange="document.getElementById('entry-hour').value=this.value; autoSave();" class="bg-slate-900 border border-slate-600 rounded-lg px-2 py-2 text-xs text-slate-300">
+                <option value="1h">1h</option>
+                <option value="2h">2h</option>
+                <option value="3h">3h</option>
+                <option value="4h">4h</option>
+                <option value="5h">5h</option>
+                <option value="6h">6h</option>
+                <option value="7h">7h</option>
+                <option value="8h" selected>8h</option>
+                <option value="9h">9h</option>
+                <option value="10h">10h</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Shift Name / Number</label>
+            <select id="entry-shift" onchange="autoSave()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer">
+              <option value="Shift - A">Shift - A</option>
+              <option value="Shift - B">Shift - B</option>
+              <option value="Shift - C">Shift - C</option>
+              <option value="General Shift">General Shift</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Header Layout Style</label>
+            <select id="entry-has-ie" onchange="autoSave()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm font-semibold focus:outline-none focus:border-blue-500">
+              <option value="withIE">With IE (Prod + IE + Quality + Maint + OMC)</option>
+              <option value="noIE">Standard (Prod + Quality + Maint + OMC & Shift)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
+              Production Line Rows (<span id="lineRowCount" class="text-emerald-400 font-extrabold">3</span> Active)
+            </h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="autoCalculateEfficiency()" class="px-2.5 sm:px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow active:scale-95">
+                ⚡ Auto Calc Eff & Best Line
+              </button>
+              <button onclick="addNewRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow active:scale-95">
+                + Add Line
+              </button>
+            </div>
+          </div>
+
+          <!-- Responsive Scrollable Data Table with touch-friendly controls -->
+          <div class="overflow-x-auto no-scrollbar touch-scroll rounded-xl border border-slate-700 bg-slate-950">
+            <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+              <thead class="bg-slate-900 text-[11px] sm:text-xs font-bold uppercase text-slate-300 tracking-wider">
+                <tr>
+                  <th class="p-2.5 sm:p-3">Line No</th>
+                  <th class="p-2.5 sm:p-3">Hourly Achieved</th>
+                  <th class="p-2.5 sm:p-3">Next Plan Target</th>
+                  <th class="p-2.5 sm:p-3">Achieved Eff %</th>
+                  <th class="p-2.5 sm:p-3">Defect Rate %</th>
+                  <th class="p-2.5 sm:p-3">Down Time (min)</th>
+                  <th class="p-2.5 sm:p-3 text-center">Hourly Best?</th>
+                  <th class="p-2.5 sm:p-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="entry-rows-container" class="divide-y divide-slate-800 text-slate-200 font-medium">
+                <!-- Dynamically populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-700">
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="saveCurrentTabData(true)" class="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 active:scale-95">
+              💾 Save & Broadcast
+            </button>
+            <button onclick="openCloudModal()" class="px-3 sm:px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition flex items-center gap-1 active:scale-95">
+              ☁️ Cloud
+            </button>
+            <button onclick="resetDefaultData()" class="px-3 sm:px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium text-xs rounded-lg transition">
+              Reset Sample
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-2 text-xs">
+            <span id="saveStatus" class="font-medium text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[11px] truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Auto-Sync: 8s
+            </span>
+            <span id="nextSyncTimer" class="font-mono text-slate-400 bg-slate-900 border border-slate-700 px-2 py-1.5 rounded-lg text-[11px]">
+              Sync in: <span id="syncCountdown" class="text-emerald-400 font-bold">8</span>s
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Factory Floor Guidance -->
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3.5 sm:p-4 text-xs text-slate-400 leading-relaxed space-y-2">
+        <p class="font-semibold text-slate-200 text-xs sm:text-sm">💡 OMC 8-TV Factory Setup Information:</p>
+        <p>1. <strong>Full Mobile & TV Responsiveness:</strong> Use on smartphones, tablets, or mount on factory TVs. The display automatically adapts its font sizes and layout without losing content.</p>
+        <p>2. <strong>One Central Master Sheet:</strong> Any modification saved here broadcasts automatically to all floor screens in real time.</p>
+        <p>3. <strong>Zero-Scroll TV Guarantee:</strong> TV display mode calculates aspect ratio dynamically to lock full 100vh height without any vertical or horizontal scrollbar.</p>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: SINGLE TV DISPLAY (RESPONSIVE ZERO-SCROLL FACTORY)     -->
+    <!-- ============================================================== -->
+    <section id="view-tv" class="hidden fixed inset-0 w-screen h-screen max-h-screen overflow-hidden bg-white text-black font-board select-none z-40 flex flex-col">
+      
+      <!-- Top 8-second progress line ticker -->
+      <div class="w-full h-1 bg-slate-200 overflow-hidden absolute top-0 left-0 z-30 pointer-events-none">
+        <div id="tvProgressIndicator" class="h-full bg-emerald-500 animate-refresh-bar"></div>
+      </div>
+
+      <!-- Mobile Orientation helper badge when viewing TV mode on phones in portrait -->
+      <div class="tv-rotate-hint hidden fixed top-2 left-1/2 -translate-x-1/2 z-50 bg-black/90 text-amber-300 text-[10px] px-3 py-1 rounded-full border border-amber-500/50 shadow-lg items-center gap-1.5">
+        <span>🔄 Rotate to Landscape for Best Factory View</span>
+      </div>
+
+      <!-- TV Container that dynamically calculates font sizing and layout -->
+      <div id="tvContainer" class="flex-1 min-h-0 w-full h-full bg-white flex flex-col overflow-hidden">
+        <!-- Content injected dynamically by renderTVView() -->
+      </div>
+
+      <!-- Floating Exit / Switch button for TV mode with responsive clock -->
+      <div class="fixed bottom-2 right-2 opacity-30 hover:opacity-100 transition-opacity z-50 flex items-center gap-1.5 sm:gap-2">
+        <div class="bg-black/90 text-emerald-400 text-[11px] sm:text-xs font-mono px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-emerald-500/40 flex items-center gap-1.5 shadow-2xl backdrop-blur">
+          <span id="tvCloudDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="tv-live-clock font-bold text-white tracking-wide">--:--:-- --</span>
+          <span class="text-slate-500 hidden sm:inline">|</span>
+          <span id="tvCloudTag" class="text-[11px] text-emerald-400 font-sans font-semibold hidden sm:inline">Cloud Live</span>
+        </div>
+        <button onclick="switchView('entry')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-black/90 hover:bg-black text-white text-[11px] sm:text-xs font-bold rounded-lg shadow-lg border border-slate-700 transition active:scale-95">
+          Exit
+        </button>
+        <button onclick="toggleFullscreen()" class="px-2 sm:px-3 py-1 sm:py-1.5 bg-black/90 hover:bg-black text-white text-[11px] sm:text-xs font-bold rounded-lg shadow-lg border border-slate-700 transition active:scale-95 hidden xs:inline-block">
+          ⛶ Full
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: 8-TV MULTI-SCREEN CONTROL ROOM (Grid View)              -->
+    <!-- ============================================================== -->
+    <section id="view-multi" class="hidden flex-1 min-h-0 flex flex-col w-full h-full max-w-[1920px] mx-auto gap-2 pb-2">
+      <div class="flex items-center justify-between bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-xs shrink-0 flex-wrap gap-2">
+        <div class="font-bold text-white flex items-center gap-2">
+          <span>🖥️ OMC Footwear 8-Screen Control Grid</span>
+          <span class="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live 8 TVs
+          </span>
+        </div>
+        
+        <!-- Floor Filter Tabs for quick inspection -->
+        <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-700 overflow-x-auto no-scrollbar">
+          <button onclick="filterMultiGrid('all')" id="btn-filter-all" class="px-2 py-1 rounded bg-blue-600 text-white font-bold text-[11px] whitespace-nowrap">All 8</button>
+          <button onclick="filterMultiGrid('dip')" id="btn-filter-dip" class="px-2 py-1 rounded text-slate-300 hover:text-white text-[11px] whitespace-nowrap">DIP (1-2)</button>
+          <button onclick="filterMultiGrid('lasting')" id="btn-filter-lasting" class="px-2 py-1 rounded text-slate-300 hover:text-white text-[11px] whitespace-nowrap">Lasting (5-6)</button>
+          <button onclick="filterMultiGrid('sewing')" id="btn-filter-sewing" class="px-2 py-1 rounded text-slate-300 hover:text-white text-[11px] whitespace-nowrap">Sewing (3,4,7,8)</button>
+        </div>
+
+        <div class="text-slate-400 hidden sm:flex items-center gap-2">
+          <span class="tv-live-clock font-mono font-bold text-emerald-400 text-xs">--:--:-- --</span>
+        </div>
+      </div>
+
+      <!-- Responsive Grid: 1 col on mobile, 2 on tablet, 4 on desktop/TV -->
+      <div id="multiTvGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 flex-1 min-h-0 overflow-y-auto no-scrollbar touch-scroll pb-6">
+        
+        <!-- TV 1 (DIP) -->
+        <div class="multi-card tv-card-dip border border-slate-700 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-red-400">TV 1: DIP Floor 1</span>
+            <button onclick="switchView('tv1')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv1" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 2 (DIP) -->
+        <div class="multi-card tv-card-dip border border-slate-700 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-red-400">TV 2: DIP Floor 2</span>
+            <button onclick="switchView('tv2')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv2" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 5 (Lasting 1) -->
+        <div class="multi-card tv-card-lasting border border-amber-800 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-amber-400">TV 5: Lasting Sec 1</span>
+            <button onclick="switchView('tv5')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv5" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 6 (Lasting 2) -->
+        <div class="multi-card tv-card-lasting border border-amber-800 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-amber-400">TV 6: Lasting Sec 2</span>
+            <button onclick="switchView('tv6')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv6" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 3 (Sewing 1) -->
+        <div class="multi-card tv-card-sewing border border-slate-700 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-blue-400">TV 3: Sewing Sec 1</span>
+            <button onclick="switchView('tv3')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv3" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 4 (Sewing 2) -->
+        <div class="multi-card tv-card-sewing border border-slate-700 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-blue-400">TV 4: Sewing Sec 2</span>
+            <button onclick="switchView('tv4')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv4" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 7 (Sewing 3) -->
+        <div class="multi-card tv-card-sewing border border-emerald-800 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-emerald-400">TV 7: Sewing Sec 3</span>
+            <button onclick="switchView('tv7')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv7" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+        <!-- TV 8 (Sewing 4) -->
+        <div class="multi-card tv-card-sewing border border-emerald-800 rounded-lg overflow-hidden shadow-xl flex flex-col bg-white min-h-[240px] sm:min-h-[280px]">
+          <div class="bg-slate-900 text-white text-[11px] px-2.5 py-1 font-bold flex justify-between items-center shrink-0">
+            <span class="text-emerald-400">TV 8: Sewing Sec 4</span>
+            <button onclick="switchView('tv8')" class="text-blue-400 hover:underline">Full Screen ↗</button>
+          </div>
+          <div id="quad-tv8" class="flex-1 min-h-0 overflow-hidden pointer-events-none flex flex-col"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: CLOUD SYNC CONFIGURATION (RESPONSIVE DIALOG)            -->
+  <!-- ============================================================== -->
+  <div id="cloudModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">☁️</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-extrabold text-white">OMC 8-TV Real-Time Cloud Sync</h3>
+            <p class="text-[11px] text-slate-400">Broadcasts live data automatically across all 8 factory TVs</p>
+          </div>
+        </div>
+        <button onclick="closeCloudModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        <p class="font-bold text-emerald-400">⚡ Pre-Configured Official OMC Cloud Database:</p>
+        <p class="text-[11px] break-all">Statically linked to <code class="text-amber-300 font-mono font-bold">https://omc-footwear-limited-default-rtdb.firebaseio.com/</code></p>
+        <p class="text-[11px]">All updates broadcast automatically across mobile phones, tablets, and 8 factory TVs.</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-1">Active Firebase Database URL:</label>
+        <textarea id="firebaseConfigInput" rows="2" class="w-full bg-slate-950 border border-slate-600 rounded-lg p-2.5 text-xs font-mono text-emerald-300 focus:outline-none focus:border-blue-500" placeholder="https://omc-footwear-limited-default-rtdb.firebaseio.com/"></textarea>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2">
+        <div class="flex items-center gap-2">
+          <button onclick="connectFirebaseCloud()" class="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow transition flex items-center justify-center gap-1.5">
+            ⚡ Save & Connect
+          </button>
+          <button onclick="restoreDefaultCloudUrl()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition" title="Restore official OMC Database URL">
+            Reset Default
+          </button>
+        </div>
+        <button onclick="copyAutoConfigLink()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow transition flex items-center justify-center gap-1.5">
+          🔗 Copy Live Link
+        </button>
+      </div>
+
+      <div id="cloudModalStatus" class="text-xs p-2.5 rounded-lg hidden font-mono"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: CALENDAR ARCHIVE HISTORY                                -->
+  <!-- ============================================================== -->
+  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl p-4 sm:p-6 space-y-3 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📅</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white">Daily Production Floor History</h3>
+            <p class="text-[11px] text-slate-400">View or restore previous production days across all 8 TVs</p>
+          </div>
+        </div>
+        <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+      <div id="calendarHistoryList" class="flex-1 overflow-y-auto no-scrollbar touch-scroll divide-y divide-slate-700/60 rounded-xl bg-slate-900/60 border border-slate-700/60">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom notification toast modal replacement for alert() -->
+  <div id="appToast" class="fixed top-4 right-4 z-50 hidden max-w-sm sm:max-w-md bg-slate-900 border border-emerald-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2.5">
+    <span id="appToastIcon" class="text-lg">✅</span>
+    <div id="appToastMessage" class="text-xs font-semibold">Notification</div>
+  </div>
+
+  <script>
+    const channel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('andon_tv_sync') : null;
+    const STATIC_FIREBASE_DB_URL = "https://omc-footwear-limited-default-rtdb.firebaseio.com";
+
+    // Helper: Toast Notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('appToast');
+      const icon = document.getElementById('appToastIcon');
+      const msg = document.getElementById('appToastMessage');
+      if (!toast || !msg) return;
+
+      msg.textContent = message;
+      if (type === 'success') {
+        toast.className = "fixed top-4 right-4 z-50 max-w-sm sm:max-w-md bg-slate-900 border border-emerald-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2.5";
+        icon.textContent = "✅";
+      } else if (type === 'warn') {
+        toast.className = "fixed top-4 right-4 z-50 max-w-sm sm:max-w-md bg-slate-900 border border-amber-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2.5";
+        icon.textContent = "⚠️";
+      } else {
+        toast.className = "fixed top-4 right-4 z-50 max-w-sm sm:max-w-md bg-slate-900 border border-rose-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2.5";
+        icon.textContent = "ℹ️";
+      }
+
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    function formatDateYMD(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDisplayDate(ymdStr) {
+      if (!ymdStr) return '';
+      const [year, month, day] = ymdStr.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function getFormattedTime12h(date = new Date()) {
+      let hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const strHours = String(hours).padStart(2, '0');
+      return `${strHours}:${minutes}:${seconds} ${ampm}`;
+    }
+
+    function getOmcLogoSVG(extraClass = "w-auto max-h-full") {
+      return `
+        <svg viewBox="0 0 416 148" class="${extraClass}" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+          <circle cx="58" cy="62" r="54" fill="#283593"/>
+          <path d="M 5 62 C 12 55, 23 68, 32 78 C 37 83, 42 76, 47 48 C 50 31, 54 26, 58 31 C 61 36, 62 50, 65 58 C 67 65, 71 80, 81 78 C 91 76, 97 60, 102 50 C 107 39, 110 52, 108 66 C 103 89, 83 113, 56 113 C 28 113, 10 93, 5 62 Z" fill="#FFFFFF"/>
+          <g fill="#283593" style="font-family: 'Arial Black', 'Inter', system-ui, sans-serif; font-weight: 900;">
+            <text x="118" y="112" font-size="112" letter-spacing="-1.5">OMC</text>
+          </g>
+          <circle cx="392" cy="27" r="17" fill="none" stroke="#283593" stroke-width="4.5"/>
+          <text x="392" y="34.5" font-family="'Arial Black', 'Inter', sans-serif" font-weight="900" font-size="20" fill="#283593" text-anchor="middle">R</text>
+          <text x="130" y="140" font-family="'Arial Black', 'Inter', sans-serif" font-weight="900" font-size="20" fill="#283593" letter-spacing="14px">FOOTWEAR</text>
+        </svg>
+      `;
+    }
+
+    function getOmcLogoComponent(containerClasses = "h-8 md:h-12") {
+      return `
+        <div class="flex items-center justify-center ${containerClasses} max-w-full overflow-hidden">
+          <img src="OMC-Footwear-Logo.png" alt="OMC FOOTWEAR" class="max-h-full max-w-full object-contain" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="h-full w-auto items-center justify-center" style="display:none;">
+            ${getOmcLogoSVG('h-full w-auto max-w-full')}
+          </div>
+        </div>
+      `;
+    }
+
+    const defaultData = {
+      tv1: {
+        id: 'tv1',
+        name: 'DIP Floor 1',
+        title: 'Production-DIP',
+        hasIE: false,
+        hour: '5h',
+        shift: 'Shift - B',
+        rows: [
+          { line: '3', achievement: 160, target: 200, efficiency: 65.4, defectRate: 1.84, downTime: 0, isBest: false },
+          { line: '4', achievement: 220, target: 206, efficiency: 69.9, defectRate: 2.22, downTime: 0, isBest: true },
+          { line: '5', achievement: 140, target: 190, efficiency: 58.2, defectRate: 3.10, downTime: 10, isBest: false }
+        ]
+      },
+      tv2: {
+        id: 'tv2',
+        name: 'DIP Floor 2',
+        title: 'Production-DIP',
+        hasIE: false,
+        hour: '8h',
+        shift: 'Shift - A',
+        rows: [
+          { line: '7', achievement: 195, target: 210, efficiency: 72.5, defectRate: 1.50, downTime: 0, isBest: true },
+          { line: '8', achievement: 170, target: 200, efficiency: 66.8, defectRate: 2.45, downTime: 5, isBest: false },
+          { line: '9', achievement: 155, target: 190, efficiency: 63.4, defectRate: 2.90, downTime: 0, isBest: false }
+        ]
+      },
+      tv3: {
+        id: 'tv3',
+        name: 'Sewing Section 1',
+        title: 'Production Sewing',
+        hasIE: true,
+        hour: '8h',
+        shift: 'Shift - A',
+        rows: [
+          { line: '17', achievement: 110, target: 180, efficiency: 51.5, defectRate: 2.27, downTime: 0, isBest: true },
+          { line: '18', achievement: 80, target: 150, efficiency: 33.6, defectRate: 3.84, downTime: 0, isBest: false },
+          { line: '19', achievement: 110, target: 190, efficiency: 49.9, defectRate: 2.63, downTime: 0, isBest: false }
+        ]
+      },
+      tv4: {
+        id: 'tv4',
+        name: 'Sewing Section 2',
+        title: 'Production Sewing',
+        hasIE: true,
+        hour: '8h',
+        shift: 'Shift - B',
+        rows: [
+          { line: '20', achievement: 130, target: 175, efficiency: 58.3, defectRate: 1.95, downTime: 0, isBest: false },
+          { line: '21', achievement: 150, target: 180, efficiency: 65.2, defectRate: 1.80, downTime: 0, isBest: true },
+          { line: '22', achievement: 105, target: 160, efficiency: 51.0, defectRate: 2.75, downTime: 15, isBest: false }
+        ]
+      },
+      tv5: {
+        id: 'tv5',
+        name: 'Lasting Section 1',
+        title: 'Production Lasting',
+        hasIE: false,
+        hour: '8h',
+        shift: 'Shift - A',
+        rows: [
+          { line: 'L-01', achievement: 175, target: 210, efficiency: 68.5, defectRate: 1.20, downTime: 0, isBest: true },
+          { line: 'L-02', achievement: 160, target: 200, efficiency: 62.0, defectRate: 1.85, downTime: 5, isBest: false },
+          { line: 'L-03', achievement: 145, target: 195, efficiency: 57.8, defectRate: 2.10, downTime: 0, isBest: false }
+        ]
+      },
+      tv6: {
+        id: 'tv6',
+        name: 'Lasting Section 2',
+        title: 'Production Lasting',
+        hasIE: false,
+        hour: '8h',
+        shift: 'Shift - B',
+        rows: [
+          { line: 'L-04', achievement: 180, target: 220, efficiency: 70.2, defectRate: 1.40, downTime: 0, isBest: true },
+          { line: 'L-05', achievement: 155, target: 205, efficiency: 61.5, defectRate: 1.90, downTime: 0, isBest: false },
+          { line: 'L-06', achievement: 140, target: 190, efficiency: 56.4, defectRate: 2.30, downTime: 10, isBest: false }
+        ]
+      },
+      tv7: {
+        id: 'tv7',
+        name: 'Sewing Section 3',
+        title: 'Production Sewing',
+        hasIE: true,
+        hour: '8h',
+        shift: 'Shift - A',
+        rows: [
+          { line: '23', achievement: 125, target: 170, efficiency: 57.5, defectRate: 1.90, downTime: 0, isBest: true },
+          { line: '24', achievement: 115, target: 175, efficiency: 52.8, defectRate: 2.15, downTime: 0, isBest: false },
+          { line: '25', achievement: 95, target: 160, efficiency: 46.0, defectRate: 3.05, downTime: 12, isBest: false }
+        ]
+      },
+      tv8: {
+        id: 'tv8',
+        name: 'Sewing Section 4',
+        title: 'Production Sewing',
+        hasIE: true,
+        hour: '8h',
+        shift: 'Shift - B',
+        rows: [
+          { line: '26', achievement: 140, target: 180, efficiency: 62.4, defectRate: 1.75, downTime: 0, isBest: true },
+          { line: '27', achievement: 120, target: 170, efficiency: 55.0, defectRate: 2.40, downTime: 0, isBest: false },
+          { line: '28', achievement: 105, target: 165, efficiency: 49.2, defectRate: 2.80, downTime: 5, isBest: false }
+        ]
+      }
+    };
+
+    let selectedDate = formatDateYMD(new Date());
+    let historyDB = {};
+    let appData = {};
+    let activeTab = 1;
+    let currentView = 'entry';
+    let isUserTyping = false;
+
+    let firebaseDBRef = null;
+    let isCloudConnected = false;
+    const AUTO_REFRESH_SECONDS = 8;
+    let countdownSec = AUTO_REFRESH_SECONDS;
+
+    function initCloudSync() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlConfig = urlParams.get('fb');
+      if (urlConfig) {
+        try {
+          const decoded = atob(decodeURIComponent(urlConfig));
+          localStorage.setItem('andon_firebase_config', decoded);
+        } catch(e) {
+          console.error("Failed to decode URL config", e);
+        }
+      }
+
+      const storedConfig = localStorage.getItem('andon_firebase_config');
+      const activeConfig = (storedConfig && storedConfig.trim().length > 0) ? storedConfig : STATIC_FIREBASE_DB_URL;
+      setupFirebaseInstance(activeConfig);
+    }
+
+    function setupFirebaseInstance(configString) {
+      try {
+        let configObj = null;
+        const trimmed = (configString || STATIC_FIREBASE_DB_URL).trim();
+        if (trimmed.startsWith('{')) {
+          configObj = JSON.parse(trimmed);
+        } else if (trimmed.startsWith('https://')) {
+          configObj = { databaseURL: trimmed.replace(/\/$/, '') };
+        } else {
+          configObj = { databaseURL: STATIC_FIREBASE_DB_URL };
+        }
+
+        if (!configObj || !configObj.databaseURL) {
+          throw new Error('Invalid databaseURL');
+        }
+
+        if (firebase.apps.length > 0) {
+          firebase.app().delete();
+        }
+
+        firebase.initializeApp(configObj);
+        const db = firebase.database();
+        firebaseDBRef = db.ref('omc_andon_live');
+
+        firebaseDBRef.on('value', (snapshot) => {
+          const cloudVal = snapshot.val();
+          if (cloudVal) {
+            isCloudConnected = true;
+            updateCloudStatusUI(true);
+
+            if (cloudVal.historyDB) historyDB = cloudVal.historyDB;
+            if (cloudVal.selectedDate) selectedDate = cloudVal.selectedDate;
+            if (cloudVal.historyDB && cloudVal.historyDB[selectedDate]) {
+              appData = cloudVal.historyDB[selectedDate];
+            } else if (cloudVal.appData) {
+              appData = cloudVal.appData;
+            }
+
+            for (let i = 1; i <= 8; i++) {
+              const k = `tv${i}`;
+              if (!appData[k]) {
+                appData[k] = JSON.parse(JSON.stringify(defaultData[k]));
+              }
+            }
+
+            localStorage.setItem('andon_calendar_history_db', JSON.stringify(historyDB));
+            localStorage.setItem('andon_garment_tv_data', JSON.stringify(appData));
+            localStorage.setItem('andon_active_date', selectedDate);
+
+            updateDateControlsUI();
+            if (currentView.startsWith('tv')) {
+              renderTVView(currentView);
+            } else if (currentView === 'multi') {
+              renderMultiView();
+            } else if (currentView === 'entry' && !isUserTyping) {
+              loadTabToForm(activeTab);
+            }
+          }
+        }, (error) => {
+          console.warn('Firebase sync error:', error);
+          isCloudConnected = false;
+          updateCloudStatusUI(false);
+        });
+
+        isCloudConnected = true;
+        updateCloudStatusUI(true);
+        return true;
+      } catch (err) {
+        console.error('Failed to init Firebase:', err);
+        isCloudConnected = false;
+        updateCloudStatusUI(false);
+        return false;
+      }
+    }
+
+    function updateCloudStatusUI(connected) {
+      const btn = document.getElementById('cloudStatusBtn');
+      const dot = document.getElementById('cloudStatusDot');
+      const label = document.getElementById('cloudStatusLabel');
+      const badge = document.getElementById('cloudEntryBadge');
+      const tvDot = document.getElementById('tvCloudDot');
+      const tvTag = document.getElementById('tvCloudTag');
+
+      if (connected) {
+        if (btn) btn.className = "px-3 py-1.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-500 text-emerald-300 font-mono text-[11px] rounded-lg font-bold flex items-center gap-1.5 shadow transition";
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+        if (label) label.textContent = "Cloud: Live Sync 🟢";
+        if (badge) {
+          badge.className = "text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 cursor-pointer whitespace-nowrap";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span><span>OMC Static Cloud Live</span>`;
+        }
+        if (tvDot) tvDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+        if (tvTag) tvTag.textContent = "Cloud Live";
+      } else {
+        if (btn) btn.className = "px-3 py-1.5 bg-slate-950 hover:bg-slate-900 border border-amber-600/80 text-amber-400 font-mono text-[11px] rounded-lg font-bold flex items-center gap-1.5 shadow transition";
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        if (label) label.textContent = "Cloud: Local Only ⚪";
+        if (badge) {
+          badge.className = "text-[10px] sm:text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 cursor-pointer whitespace-nowrap";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Local Mode (Connect Cloud)</span>`;
+        }
+        if (tvDot) tvDot.className = "w-2 h-2 rounded-full bg-amber-400";
+        if (tvTag) tvTag.textContent = "Local Cache";
+      }
+    }
+
+    function openCloudModal() {
+      const modal = document.getElementById('cloudModal');
+      const input = document.getElementById('firebaseConfigInput');
+      const existing = localStorage.getItem('andon_firebase_config');
+      if (input && existing) {
+        input.value = existing;
+      }
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCloudModal() {
+      const modal = document.getElementById('cloudModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function connectFirebaseCloud() {
+      const input = document.getElementById('firebaseConfigInput');
+      const status = document.getElementById('cloudModalStatus');
+      const raw = input.value.trim();
+
+      if (!raw) {
+        status.className = "text-xs p-2.5 rounded-lg bg-rose-950 border border-rose-700 text-rose-300 block font-mono";
+        status.textContent = "Please enter your Firebase databaseURL.";
+        return;
+      }
+
+      localStorage.setItem('andon_firebase_config', raw);
+      const success = setupFirebaseInstance(raw);
+      if (success) {
+        saveHistoryToStorage(true);
+        status.className = "text-xs p-2.5 rounded-lg bg-emerald-950 border border-emerald-700 text-emerald-300 block font-mono";
+        status.textContent = "✅ Connected to Firebase! 8-TV Cloud sync is active.";
+        setTimeout(() => closeCloudModal(), 1800);
+      } else {
+        status.className = "text-xs p-2.5 rounded-lg bg-rose-950 border border-rose-700 text-rose-300 block font-mono";
+        status.textContent = "❌ Failed to connect. Check databaseURL permissions.";
+      }
+    }
+
+    function restoreDefaultCloudUrl() {
+      const input = document.getElementById('firebaseConfigInput');
+      if (input) input.value = STATIC_FIREBASE_DB_URL;
+      connectFirebaseCloud();
+    }
+
+    function copyAutoConfigLink() {
+      const config = localStorage.getItem('andon_firebase_config') || STATIC_FIREBASE_DB_URL;
+      const encoded = encodeURIComponent(btoa(config));
+      const url = `${window.location.origin}${window.location.pathname}?fb=${encoded}`;
+      
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast("Auto-Config Link copied! Open on any factory TV browser.", "success");
+      } catch (err) {
+        showToast("Please copy link from address bar", "warn");
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function loadData() {
+      try {
+        const storedHistory = localStorage.getItem('andon_calendar_history_db');
+        historyDB = storedHistory ? JSON.parse(storedHistory) : {};
+
+        const storedSelectedDate = localStorage.getItem('andon_active_date');
+        selectedDate = storedSelectedDate ? storedSelectedDate : formatDateYMD(new Date());
+
+        if (!historyDB[selectedDate]) {
+          const legacy = localStorage.getItem('andon_garment_tv_data');
+          historyDB[selectedDate] = legacy ? JSON.parse(legacy) : JSON.parse(JSON.stringify(defaultData));
+        }
+
+        appData = historyDB[selectedDate];
+
+        for (let i = 1; i <= 8; i++) {
+          const k = `tv${i}`;
+          if (!appData[k]) {
+            appData[k] = JSON.parse(JSON.stringify(defaultData[k]));
+          }
+        }
+
+        saveHistoryToStorage(false);
+      } catch (e) {
+        console.error('Error reading history DB:', e);
+        historyDB = {};
+        selectedDate = formatDateYMD(new Date());
+        appData = JSON.parse(JSON.stringify(defaultData));
+        historyDB[selectedDate] = appData;
+      }
+
+      updateDateControlsUI();
+    }
+
+    function saveHistoryToStorage(broadcast = true) {
+      try {
+        historyDB[selectedDate] = appData;
+        localStorage.setItem('andon_calendar_history_db', JSON.stringify(historyDB));
+        localStorage.setItem('andon_garment_tv_data', JSON.stringify(appData));
+        localStorage.setItem('andon_active_date', selectedDate);
+
+        if (broadcast && channel) {
+          channel.postMessage({
+            type: 'DATA_UPDATED',
+            payload: {
+              activeDate: selectedDate,
+              data: appData,
+              history: historyDB
+            }
+          });
+        }
+
+        if (broadcast && firebaseDBRef) {
+          firebaseDBRef.set({
+            selectedDate: selectedDate,
+            appData: appData,
+            historyDB: historyDB,
+            updatedAt: Date.now()
+          }).catch(err => console.warn('Cloud broadcast failed:', err));
+        }
+      } catch (e) {
+        console.error('Error saving storage:', e);
+      }
+    }
+
+    function updateDateControlsUI() {
+      const datePicker = document.getElementById('activeDateSelector');
+      if (datePicker) {
+        datePicker.value = selectedDate;
+      }
+
+      const todayStr = formatDateYMD(new Date());
+      const isToday = (selectedDate === todayStr);
+
+      const statusBadge = document.getElementById('dateStatusBadge');
+      const statusText = document.getElementById('dateStatusText');
+      const btnToday = document.getElementById('btn-date-today');
+      const btnYesterday = document.getElementById('btn-date-yesterday');
+
+      if (statusBadge && statusText) {
+        if (isToday) {
+          statusBadge.className = "text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-700 text-emerald-400 flex items-center justify-center gap-1.5 self-start md:self-auto";
+          statusText.textContent = "Today's Live Floor (" + formatDisplayDate(selectedDate) + ")";
+        } else {
+          statusBadge.className = "text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-950 border border-amber-600 text-amber-300 flex items-center justify-center gap-1.5 self-start md:self-auto";
+          statusText.textContent = "Archive View: " + formatDisplayDate(selectedDate);
+        }
+      }
+
+      if (btnToday && btnYesterday) {
+        const yest = new Date();
+        yest.setDate(yest.getDate() - 1);
+        const yestStr = formatDateYMD(yest);
+
+        btnToday.className = isToday ? "px-2.5 py-1 rounded font-bold bg-blue-600 text-white transition" : "px-2.5 py-1 rounded font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition";
+        btnYesterday.className = (selectedDate === yestStr) ? "px-2.5 py-1 rounded font-bold bg-blue-600 text-white transition" : "px-2.5 py-1 rounded font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition";
+      }
+    }
+
+    function changeActiveDate(newDateStr) {
+      if (!newDateStr) return;
+      autoSave();
+
+      selectedDate = newDateStr;
+      if (!historyDB[selectedDate]) {
+        historyDB[selectedDate] = JSON.parse(JSON.stringify(appData || defaultData));
+      }
+
+      appData = historyDB[selectedDate];
+      for (let i = 1; i <= 8; i++) {
+        const k = `tv${i}`;
+        if (!appData[k]) {
+          appData[k] = JSON.parse(JSON.stringify(defaultData[k]));
+        }
+      }
+
+      saveHistoryToStorage(true);
+      updateDateControlsUI();
+      loadTabToForm(activeTab);
+
+      if (currentView.startsWith('tv')) {
+        renderTVView(currentView);
+      } else if (currentView === 'multi') {
+        renderMultiView();
+      }
+    }
+
+    function onDatePickerChange(dateVal) {
+      if (dateVal) changeActiveDate(dateVal);
+    }
+
+    function selectQuickDate(type) {
+      const now = new Date();
+      if (type === 'today') {
+        changeActiveDate(formatDateYMD(now));
+      } else if (type === 'yesterday') {
+        const yest = new Date(now);
+        yest.setDate(now.getDate() - 1);
+        changeActiveDate(formatDateYMD(yest));
+      }
+    }
+
+    function copyFromPreviousDay() {
+      const curr = new Date(selectedDate);
+      curr.setDate(curr.getDate() - 1);
+      const prevDateStr = formatDateYMD(curr);
+
+      if (!historyDB[prevDateStr]) {
+        showToast(`No records found for previous day (${formatDisplayDate(prevDateStr)})`, "warn");
+        return;
+      }
+
+      const prevData = historyDB[prevDateStr];
+      const cloned = JSON.parse(JSON.stringify(prevData));
+      
+      for (let i = 1; i <= 8; i++) {
+        const k = `tv${i}`;
+        if (cloned[k] && cloned[k].rows) {
+          cloned[k].rows.forEach(r => {
+            r.achievement = 0;
+            r.efficiency = 0;
+            r.downTime = 0;
+            r.defectRate = 0;
+            r.isBest = false;
+          });
+        }
+      }
+
+      appData = cloned;
+      saveHistoryToStorage(true);
+      loadTabToForm(activeTab);
+      showToast(`Successfully copied setup from ${formatDisplayDate(prevDateStr)} to all 8 TVs!`, "success");
+    }
+
+    function openCalendarModal() {
+      const modal = document.getElementById('calendarModal');
+      const listContainer = document.getElementById('calendarHistoryList');
+      if (!modal || !listContainer) return;
+
+      const dateKeys = Object.keys(historyDB).sort().reverse();
+      listContainer.innerHTML = '';
+
+      if (dateKeys.length === 0) {
+        listContainer.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm">No historical dates recorded yet.</div>`;
+      } else {
+        dateKeys.forEach(dateStr => {
+          const dData = historyDB[dateStr];
+          let totalLines = 0;
+          let totalAchievement = 0;
+          let totalTarget = 0;
+
+          for (let i = 1; i <= 8; i++) {
+            const k = `tv${i}`;
+            if (dData[k] && dData[k].rows) {
+              dData[k].rows.forEach(r => {
+                totalLines++;
+                totalAchievement += (Number(r.achievement) || 0);
+                totalTarget += (Number(r.target) || 0);
+              });
+            }
+          }
+
+          const avgEff = totalTarget > 0 ? ((totalAchievement / totalTarget) * 100).toFixed(1) : '0.0';
+          const isCurrentActive = (dateStr === selectedDate);
+
+          const item = document.createElement('div');
+          item.className = `p-3 sm:p-4 flex items-center justify-between gap-2.5 ${isCurrentActive ? 'bg-blue-950/40 border-l-4 border-blue-500' : 'hover:bg-slate-800/60'}`;
+          item.innerHTML = `
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div class="p-2 bg-slate-800 rounded-lg text-lg sm:text-xl shrink-0">📅</div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-bold text-white text-xs sm:text-base">${formatDisplayDate(dateStr)}</span>
+                  <span class="text-[11px] font-mono text-slate-400">(${dateStr})</span>
+                  ${isCurrentActive ? '<span class="text-[9px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded">Active</span>' : ''}
+                </div>
+                <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
+                  <span>Lines: <strong class="text-white">${totalLines}</strong></span>
+                  <span>Total: <strong class="text-emerald-400">${totalAchievement}</strong> prs</span>
+                  <span>Avg Eff: <strong class="text-indigo-300">${avgEff}%</strong></span>
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0">
+              <button onclick="loadDateFromHistory('${dateStr}')" class="px-2.5 sm:px-3.5 py-1.5 ${isCurrentActive ? 'bg-slate-700 text-slate-300' : 'bg-blue-600 hover:bg-blue-500 text-white'} text-xs font-bold rounded-lg shadow transition">
+                ${isCurrentActive ? 'Active' : 'Load ↗'}
+              </button>
+            </div>
+          `;
+          listContainer.appendChild(item);
+        });
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+      const modal = document.getElementById('calendarModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function loadDateFromHistory(dateStr) {
+      changeActiveDate(dateStr);
+      closeCalendarModal();
+    }
+
+    function updateClock() {
+      const timeStr12h = getFormattedTime12h();
+      const clockEl = document.getElementById('liveClock');
+      if (clockEl) clockEl.textContent = timeStr12h;
+
+      document.querySelectorAll('.tv-live-clock').forEach(el => el.textContent = timeStr12h);
+      document.querySelectorAll('.tv-inline-time').forEach(el => el.textContent = timeStr12h);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function performAutoRefresh() {
+      if (!isCloudConnected) {
+        loadData();
+      }
+
+      if (currentView.startsWith('tv')) {
+        renderTVView(currentView);
+      } else if (currentView === 'multi') {
+        renderMultiView();
+      } else if (currentView === 'entry' && !isUserTyping) {
+        loadTabToForm(activeTab);
+      }
+
+      const ticker = document.getElementById('tvProgressIndicator');
+      if (ticker) {
+        ticker.style.animation = 'none';
+        void ticker.offsetWidth;
+        ticker.style.animation = 'refreshTicker 8s linear infinite';
+      }
+    }
+
+    setInterval(() => {
+      countdownSec--;
+      if (countdownSec <= 0) {
+        countdownSec = AUTO_REFRESH_SECONDS;
+        performAutoRefresh();
+      }
+      const countdownEl = document.getElementById('syncCountdown');
+      if (countdownEl) countdownEl.textContent = countdownSec;
+    }, 1000);
+
+    if (channel) {
+      channel.onmessage = (event) => {
+        if (event.data && event.data.type === 'DATA_UPDATED') {
+          const payload = event.data.payload;
+          if (payload) {
+            if (payload.history) historyDB = payload.history;
+            if (payload.activeDate) selectedDate = payload.activeDate;
+            if (payload.data) appData = payload.data;
+          }
+          updateDateControlsUI();
+          if (currentView.startsWith('tv')) {
+            renderTVView(currentView);
+          } else if (currentView === 'multi') {
+            renderMultiView();
+          } else if (currentView === 'entry' && !isUserTyping) {
+            loadTabToForm(activeTab);
+          }
+        }
+      };
+    }
+
+    function selectEntryTab(tabNum) {
+      activeTab = tabNum;
+      for (let i = 1; i <= 8; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        if (!btn) continue;
+        if (i === tabNum) {
+          btn.className = "px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-red-500 text-red-400 bg-slate-800/60 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap";
+        } else {
+          btn.className = "px-3 py-2 sm:px-3.5 sm:py-2.5 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 rounded-t-lg transition flex items-center gap-1 whitespace-nowrap";
+        }
+      }
+      loadTabToForm(tabNum);
+    }
+
+    function loadTabToForm(tabNum) {
+      const key = `tv${tabNum}`;
+      const tv = appData[key] || defaultData[key];
+      if (!tv) return;
+
+      document.getElementById('entry-title').value = tv.title || '';
+      document.getElementById('entry-hour').value = tv.hour || '8h';
+
+      const shiftSelect = document.getElementById('entry-shift');
+      if (shiftSelect) {
+        let currentShift = tv.shift || 'Shift - A';
+        if (currentShift === 'Shift A') currentShift = 'Shift - A';
+        if (currentShift === 'Shift B') currentShift = 'Shift - B';
+        if (currentShift === 'Shift C') currentShift = 'Shift - C';
+        
+        const optionExists = Array.from(shiftSelect.options).some(opt => opt.value === currentShift);
+        if (!optionExists) {
+          const opt = document.createElement('option');
+          opt.value = currentShift;
+          opt.textContent = currentShift;
+          shiftSelect.appendChild(opt);
+        }
+        shiftSelect.value = currentShift;
+      }
+
+      document.getElementById('entry-has-ie').value = tv.hasIE ? 'withIE' : 'noIE';
+      renderEntryRows(tv.rows || []);
+    }
+
+    function renderEntryRows(rows) {
+      const container = document.getElementById('entry-rows-container');
+      container.innerHTML = '';
+      document.getElementById('lineRowCount').textContent = rows.length;
+
+      rows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/60 transition";
+        tr.innerHTML = `
+          <td class="p-2 sm:p-3">
+            <input type="text" value="${row.line}" 
+              onfocus="isUserTyping=true" onblur="isUserTyping=false"
+              onchange="updateRowField(${idx}, 'line', this.value)" class="w-16 sm:w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-bold text-center">
+          </td>
+          <td class="p-2 sm:p-3">
+            <input type="number" value="${row.achievement}" 
+              onfocus="isUserTyping=true" onblur="isUserTyping=false"
+              onchange="updateRowField(${idx}, 'achievement', parseFloat(this.value)||0)" class="w-20 sm:w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-semibold">
+          </td>
+          <td class="p-2 sm:p-3">
+            <input type="number" value="${row.target}" 
+              onfocus="isUserTyping=true" onblur="isUserTyping=false"
+              onchange="updateRowField(${idx}, 'target', parseFloat(this.value)||0)" class="w-20 sm:w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-semibold">
+          </td>
+          <td class="p-2 sm:p-3">
+            <div class="flex items-center gap-1">
+              <input type="number" step="0.1" value="${row.efficiency}" 
+                onfocus="isUserTyping=true" onblur="isUserTyping=false"
+                onchange="updateRowField(${idx}, 'efficiency', parseFloat(this.value)||0)" class="w-16 sm:w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+              <span class="text-xs text-slate-400">%</span>
+            </div>
+          </td>
+          <td class="p-2 sm:p-3">
+            <div class="flex items-center gap-1">
+              <input type="number" step="0.01" value="${row.defectRate}" 
+                onfocus="isUserTyping=true" onblur="isUserTyping=false"
+                onchange="updateRowField(${idx}, 'defectRate', parseFloat(this.value)||0)" class="w-16 sm:w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-amber-400 font-semibold">
+              <span class="text-xs text-slate-400">%</span>
+            </div>
+          </td>
+          <td class="p-2 sm:p-3">
+            <div class="flex items-center gap-1">
+              <input type="number" value="${row.downTime}" 
+                onfocus="isUserTyping=true" onblur="isUserTyping=false"
+                onchange="updateRowField(${idx}, 'downTime', parseInt(this.value)||0)" class="w-14 sm:w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-semibold">
+              <span class="text-xs text-slate-400">m</span>
+            </div>
+          </td>
+          <td class="p-2 sm:p-3 text-center">
+            <input type="checkbox" ${row.isBest ? 'checked' : ''} onchange="setBestLine(${idx}, this.checked)" class="w-5 h-5 rounded accent-yellow-400 cursor-pointer">
+          </td>
+          <td class="p-2 sm:p-3 text-center">
+            <button onclick="removeRow(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 rounded hover:bg-rose-950/40 text-xs transition">
+              ✕
+            </button>
+          </td>
+        `;
+        container.appendChild(tr);
+      });
+    }
+
+    function updateRowField(index, field, value) {
+      const key = `tv${activeTab}`;
+      if (appData[key] && appData[key].rows[index]) {
+        appData[key].rows[index][field] = value;
+        autoSave();
+      }
+    }
+
+    function setBestLine(index, checked) {
+      const key = `tv${activeTab}`;
+      if (!appData[key]) return;
+      if (checked) {
+        appData[key].rows.forEach((r, i) => r.isBest = (i === index));
+      } else {
+        appData[key].rows[index].isBest = false;
+      }
+      renderEntryRows(appData[key].rows);
+      autoSave();
+    }
+
+    function addNewRow() {
+      const key = `tv${activeTab}`;
+      const prefix = (activeTab === 5 || activeTab === 6) ? 'L-' : '';
+      const rowCount = appData[key].rows.length;
+      let nextLineName = `${prefix}${rowCount + 1}`;
+      
+      appData[key].rows.push({
+        line: nextLineName,
+        achievement: 100,
+        target: 150,
+        efficiency: 66.7,
+        defectRate: 2.0,
+        downTime: 0,
+        isBest: false
+      });
+      renderEntryRows(appData[key].rows);
+      autoSave();
+    }
+
+    function removeRow(index) {
+      const key = `tv${activeTab}`;
+      if (appData[key] && appData[key].rows.length > 1) {
+        appData[key].rows.splice(index, 1);
+        renderEntryRows(appData[key].rows);
+        autoSave();
+      }
+    }
+
+    function autoCalculateEfficiency() {
+      const key = `tv${activeTab}`;
+      const rows = appData[key].rows;
+      if (!rows || rows.length === 0) return;
+
+      let maxEff = -1;
+      let bestIndex = -1;
+
+      rows.forEach((r, i) => {
+        if (r.target > 0) {
+          r.efficiency = parseFloat(((r.achievement / r.target) * 100).toFixed(1));
+        }
+        if (r.efficiency > maxEff) {
+          maxEff = r.efficiency;
+          bestIndex = i;
+        }
+      });
+
+      rows.forEach((r, i) => {
+        r.isBest = (i === bestIndex);
+      });
+
+      renderEntryRows(rows);
+      saveCurrentTabData(true);
+    }
+
+    function autoSave() {
+      const key = `tv${activeTab}`;
+      if (!appData[key]) return;
+      appData[key].title = document.getElementById('entry-title').value.trim();
+      appData[key].hour = document.getElementById('entry-hour').value.trim();
+      appData[key].shift = document.getElementById('entry-shift').value;
+      appData[key].hasIE = (document.getElementById('entry-has-ie').value === 'withIE');
+      saveHistoryToStorage(true);
+    }
+
+    function saveCurrentTabData(showFeedback = false) {
+      autoSave();
+      countdownSec = AUTO_REFRESH_SECONDS;
+      if (showFeedback) {
+        const badge = document.getElementById('saveStatus');
+        badge.textContent = `✅ Saved! Broadcasted to All 8 TVs`;
+        badge.className = "text-[11px] font-bold text-emerald-300 bg-emerald-800 border border-emerald-500 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5";
+        setTimeout(() => {
+          badge.textContent = "Auto-Sync: 8s";
+          badge.className = "font-medium text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[11px] truncate";
+        }, 2200);
+      }
+    }
+
+    function resetDefaultData() {
+      appData = JSON.parse(JSON.stringify(defaultData));
+      saveHistoryToStorage(true);
+      loadTabToForm(activeTab);
+      showToast("Reset to OMC 8-TV default sample data", "info");
+    }
+
+    function generateBoardHTML(tvKey, isCompact = false) {
+      const tv = appData[tvKey] || defaultData[tvKey];
+      const hasIE = tv.hasIE;
+      const rows = tv.rows || [];
+      const hour = tv.hour || '8h';
+      const shift = tv.shift || 'Shift A';
+      const title = tv.title || 'Production';
+      const currentTime12h = getFormattedTime12h();
+      const formattedDate = formatDisplayDate(selectedDate);
+
+      const displayRows = [...rows];
+      while (displayRows.length < 3) {
+        displayRows.push({ line: '', achievement: '', target: '', efficiency: '', defectRate: '', downTime: '', isBest: false, isEmpty: true });
+      }
+
+      const totalRows = displayRows.length;
+
+      // Dynamically calculate responsive styling based on row count and viewport
+      let numFontSize = 'text-2xl sm:text-4xl md:text-5xl lg:text-6xl';
+      let headerHeightClass = 'h-[12vh] min-h-[50px] sm:min-h-[70px] max-h-[110px]';
+      let subHeaderHeightClass = 'min-h-[36px] sm:min-h-[48px]';
+      let emojiSvgSize = 'w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16';
+      let bannerTitleSize = 'text-xl sm:text-3xl md:text-4xl lg:text-5xl';
+      let bannerSubSize = 'text-[10px] sm:text-xs md:text-lg lg:text-xl';
+      let bannerHourSize = 'text-2xl sm:text-4xl md:text-5xl lg:text-6xl';
+      let subHeaderFontSize = 'text-[9px] sm:text-xs md:text-sm lg:text-base';
+      let logoHeightClass = 'h-6 sm:h-8 md:h-11';
+      let downTimeMinText = 'text-[9px] sm:text-xs md:text-lg lg:text-xl';
+
+      if (isCompact) {
+        headerHeightClass = 'h-[14%] min-h-[28px]';
+        subHeaderHeightClass = 'min-h-[24px]';
+        logoHeightClass = 'h-3 sm:h-4';
+        bannerHourSize = 'text-[10px] sm:text-xs font-black';
+        bannerTitleSize = 'text-[9px] sm:text-xs font-black';
+        bannerSubSize = 'text-[7px] sm:text-[8px]';
+        subHeaderFontSize = 'text-[6px] sm:text-[7.5px]';
+        downTimeMinText = 'text-[6px]';
+
+        if (totalRows <= 4) {
+          numFontSize = 'text-[10px] sm:text-xs md:text-sm font-black';
+          emojiSvgSize = 'w-3 h-3 sm:w-4 sm:h-4';
+        } else {
+          numFontSize = 'text-[8.5px] sm:text-[10px] font-bold';
+          emojiSvgSize = 'w-2.5 h-2.5 sm:w-3 sm:h-3';
+        }
+      } else {
+        if (totalRows <= 4) {
+          numFontSize = 'text-2xl sm:text-4xl md:text-5xl lg:text-6xl';
+          headerHeightClass = 'h-[13vh] min-h-[55px] sm:min-h-[70px] max-h-[110px]';
+          emojiSvgSize = 'w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16';
+          bannerTitleSize = 'text-xl sm:text-3xl md:text-4xl lg:text-5xl';
+          bannerSubSize = 'text-xs sm:text-sm md:text-xl lg:text-2xl';
+          bannerHourSize = 'text-3xl sm:text-4xl md:text-6xl';
+          logoHeightClass = 'h-6 sm:h-8 md:h-12';
+          downTimeMinText = 'text-xs sm:text-sm md:text-xl';
+        } else if (totalRows <= 6) {
+          numFontSize = 'text-xl sm:text-3xl md:text-4xl lg:text-5xl';
+          headerHeightClass = 'h-[11.5vh] min-h-[50px] sm:min-h-[60px] max-h-[95px]';
+          emojiSvgSize = 'w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12';
+          bannerTitleSize = 'text-lg sm:text-2xl md:text-3xl lg:text-4xl';
+          bannerSubSize = 'text-[10px] sm:text-xs md:text-base';
+          bannerHourSize = 'text-2xl sm:text-3xl md:text-5xl';
+          logoHeightClass = 'h-5 sm:h-6 md:h-10';
+          downTimeMinText = 'text-[10px] sm:text-xs md:text-base';
+        } else if (totalRows <= 8) {
+          numFontSize = 'text-lg sm:text-2xl md:text-3xl lg:text-4xl';
+          headerHeightClass = 'h-[10.5vh] min-h-[45px] sm:min-h-[55px] max-h-[85px]';
+          emojiSvgSize = 'w-6 h-6 sm:w-7 sm:h-7 md:w-10 md:h-10';
+          bannerTitleSize = 'text-base sm:text-xl md:text-2xl lg:text-3xl';
+          bannerSubSize = 'text-[9px] sm:text-[11px] md:text-sm';
+          bannerHourSize = 'text-xl sm:text-2xl md:text-4xl';
+          logoHeightClass = 'h-4 sm:h-5 md:h-8';
+          downTimeMinText = 'text-[9px] sm:text-[11px] md:text-sm';
+        } else {
+          numFontSize = 'text-sm sm:text-lg md:text-xl lg:text-2xl';
+          headerHeightClass = 'h-[9vh] min-h-[40px] sm:min-h-[48px] max-h-[70px]';
+          emojiSvgSize = 'w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7';
+          bannerTitleSize = 'text-sm sm:text-base md:text-xl';
+          bannerSubSize = 'text-[8px] sm:text-[10px] md:text-xs';
+          bannerHourSize = 'text-lg sm:text-xl md:text-3xl';
+          logoHeightClass = 'h-3.5 sm:h-4 md:h-6';
+          downTimeMinText = 'text-[8px] sm:text-[10px]';
+        }
+      }
+
+      let topHeaderCols = '';
+      if (hasIE) {
+        let mainTitle = title;
+        let subTitle = '';
+        if (title.includes('(')) {
+          const parts = title.split('(');
+          mainTitle = parts[0].trim();
+          subTitle = '(' + parts.slice(1).join('(').replace(/^\s*\(?/, '').replace(/\)?\s*$/, '').trim() + ')';
+        } else if (title.includes(' ')) {
+          const parts = title.split(' ');
+          mainTitle = parts[0].trim();
+          subTitle = parts.slice(1).join(' ').trim();
+        }
+
+        topHeaderCols = `
+          <div class="andon-grid w-full ${headerHeightClass} border-b-2 border-black shrink-0">
+            <div class="bg-white text-black flex items-center justify-center font-black ${bannerHourSize} border-r-2 border-black min-h-0 overflow-hidden leading-none">
+              ${hour}
+            </div>
+            <div class="bg-prod-red text-white flex flex-col items-center justify-center font-extrabold text-center px-0.5 sm:px-1 border-r-2 border-black min-h-0 overflow-hidden leading-tight" style="grid-column: span 2;">
+              <span class="${bannerTitleSize} tracking-tight leading-none truncate w-full">${mainTitle || 'Production'}</span>
+              ${subTitle ? `<span class="${bannerSubSize} font-bold mt-0.5 leading-none truncate w-full">${subTitle}</span>` : ''}
+            </div>
+            <div class="bg-ie-blue text-white flex items-center justify-center font-black ${bannerTitleSize} border-r-2 border-black tracking-wider min-h-0 overflow-hidden leading-none">
+              IE
+            </div>
+            <div class="bg-quality-yellow text-black flex items-center justify-center font-black ${bannerTitleSize} border-r-2 border-black tracking-tight min-h-0 overflow-hidden leading-none">
+              Quality
+            </div>
+            <div class="bg-maint-cyan text-black flex items-center justify-center font-black ${bannerSubSize} border-r-2 border-black text-center px-0.5 sm:px-1 min-h-0 overflow-hidden leading-tight uppercase">
+              Maintenance
+            </div>
+            <div class="bg-white text-black flex flex-col items-center justify-center p-0.5 min-h-0 overflow-hidden leading-tight">
+              ${getOmcLogoComponent(logoHeightClass)}
+              <div class="text-[6.5px] sm:text-[8px] md:text-[10px] font-black text-slate-800 leading-none mt-0.5 tracking-wider uppercase flex items-center justify-center gap-0.5 sm:gap-1 flex-wrap truncate">
+                <span class="text-blue-900 font-extrabold">${formattedDate}</span>
+                <span class="text-slate-400">|</span>
+                <span>${shift}</span>
+                <span class="text-slate-400 hidden sm:inline">|</span>
+                <span class="tv-inline-time font-mono font-bold text-red-600 hidden sm:inline">${currentTime12h}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        topHeaderCols = `
+          <div class="andon-grid w-full ${headerHeightClass} border-b-2 border-black shrink-0">
+            <div class="bg-white text-black flex items-center justify-center font-black ${bannerHourSize} border-r-2 border-black min-h-0 overflow-hidden leading-none">
+              ${hour}
+            </div>
+            <div class="bg-prod-red text-white flex items-center justify-center font-extrabold text-center px-1 sm:px-2 border-r-2 border-black min-h-0 overflow-hidden leading-tight" style="grid-column: span 3;">
+              <span class="${bannerTitleSize} tracking-tight truncate w-full">${title}</span>
+            </div>
+            <div class="bg-quality-yellow text-black flex items-center justify-center font-black ${bannerTitleSize} border-r-2 border-black tracking-tight min-h-0 overflow-hidden leading-none">
+              Quality
+            </div>
+            <div class="bg-maint-cyan text-black flex items-center justify-center font-black ${bannerSubSize} border-r-2 border-black text-center px-0.5 sm:px-1 min-h-0 overflow-hidden leading-tight uppercase">
+              Maintenance
+            </div>
+            <div class="bg-white text-black flex flex-col items-center justify-center p-0.5 min-h-0 overflow-hidden leading-tight">
+              ${getOmcLogoComponent(logoHeightClass)}
+              <div class="text-[6.5px] sm:text-[8px] md:text-[10px] font-black text-slate-800 leading-none mt-0.5 tracking-wider uppercase flex items-center justify-center gap-0.5 sm:gap-1 flex-wrap truncate">
+                <span class="text-blue-900 font-extrabold">${formattedDate}</span>
+                <span class="text-slate-400">|</span>
+                <span>${shift}</span>
+                <span class="text-slate-400 hidden sm:inline">|</span>
+                <span class="tv-inline-time font-mono font-bold text-red-600 hidden sm:inline">${currentTime12h}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const subHeader = `
+        <div class="andon-grid w-full ${subHeaderHeightClass} bg-black text-white font-bold text-center border-b-2 border-black uppercase tracking-wider shrink-0 py-0.5 sm:py-1 items-center">
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold min-h-0 min-w-0 leading-tight">Line</div>
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Achieved</div>
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Target</div>
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Efficiency</div>
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Defect</div>
+          <div class="flex items-center justify-center border-r-2 border-white/40 ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Down Time</div>
+          <div class="flex items-center justify-center ${subHeaderFontSize} px-0.5 text-center font-bold leading-tight min-h-0 min-w-0">Best Line</div>
+        </div>
+      `;
+
+      let dataRowsHTML = '';
+      displayRows.forEach((r, idx) => {
+        const isAltBg = (idx % 2 === 1);
+        const bgClass = isAltBg ? 'bg-row-alt' : 'bg-white';
+        const isLastRow = (idx === displayRows.length - 1);
+        const bottomBorderClass = isLastRow ? '' : 'border-b-2 border-black';
+
+        if (r.isEmpty) {
+          dataRowsHTML += `
+            <div class="andon-grid w-full flex-1 min-h-0 ${bgClass} ${bottomBorderClass} items-stretch">
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="border-r-2 border-black h-full"></div>
+              <div class="h-full"></div>
+            </div>
+          `;
+          return;
+        }
+
+        const bestEmoji = r.isBest ? `
+          <div class="pulse-emoji">
+            <svg class="${emojiSvgSize}" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="#ffcc00" stroke="#d99b00" stroke-width="3"/>
+              <ellipse cx="36" cy="38" rx="6" ry="9" fill="#2d1e00"/>
+              <ellipse cx="64" cy="38" rx="6" ry="9" fill="#2d1e00"/>
+              <circle cx="34" cy="35" r="2.5" fill="#ffffff"/>
+              <circle cx="62" cy="35" r="2.5" fill="#ffffff"/>
+              <path d="M 28 54 Q 50 82 72 54" stroke="#2d1e00" stroke-width="4" fill="#ffffff"/>
+              <path d="M 33 55 Q 50 78 67 55" fill="#d82b2b"/>
+              <path d="M 40 70 Q 50 76 60 70" fill="#f87171"/>
+              <path d="M 72 70 C 72 65, 85 58, 88 50 C 90 44, 82 40, 78 45 L 75 52 L 75 42 C 75 36, 68 36, 68 42 L 68 62 Z" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+            </svg>
+          </div>
+        ` : '';
+
+        dataRowsHTML += `
+          <div class="andon-grid w-full flex-1 min-h-0 ${bgClass} ${bottomBorderClass} text-black font-extrabold items-stretch">
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.line}
+            </div>
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.achievement}
+            </div>
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.target}
+            </div>
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.efficiency !== '' ? `${r.efficiency}%` : ''}
+            </div>
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.defectRate !== '' ? `${r.defectRate}%` : ''}
+            </div>
+            <div class="flex items-center justify-center border-r-2 border-black h-full min-h-0 min-w-0 overflow-hidden leading-tight font-num ${numFontSize}">
+              ${r.downTime !== '' ? `${r.downTime}<span class="${downTimeMinText} font-semibold ml-0.5">m</span>` : ''}
+            </div>
+            <div class="flex items-center justify-center h-full min-h-0 min-w-0 overflow-hidden p-0.5">
+              ${bestEmoji}
+            </div>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="w-full h-full flex flex-col border-2 sm:border-4 border-black bg-white shadow-2xl overflow-hidden min-h-0">
+          ${topHeaderCols}
+          ${subHeader}
+          <div class="flex-1 min-h-0 flex flex-col justify-stretch overflow-hidden bg-white">
+            ${dataRowsHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    function switchView(viewName) {
+      currentView = viewName;
+
+      ['entry', 'multi', 'tv1', 'tv2', 'tv3', 'tv4', 'tv5', 'tv6', 'tv7', 'tv8'].forEach(id => {
+        const btn = document.getElementById(`btn-${id}`);
+        if (btn) btn.className = "px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap";
+      });
+      const activeBtn = document.getElementById(`btn-${viewName}`);
+      if (activeBtn) activeBtn.className = "px-2.5 py-1.5 rounded-lg bg-blue-600 text-white shadow transition-all whitespace-nowrap font-bold";
+
+      document.getElementById('view-entry').classList.add('hidden');
+      document.getElementById('view-tv').classList.add('hidden');
+      document.getElementById('view-multi').classList.add('hidden');
+
+      if (viewName === 'entry') {
+        document.body.classList.remove('tv-lock-screen');
+        document.getElementById('mainNav').classList.remove('hidden');
+        document.getElementById('view-entry').classList.remove('hidden');
+        loadTabToForm(activeTab);
+      } else if (viewName === 'multi') {
+        document.body.classList.remove('tv-lock-screen');
+        document.getElementById('mainNav').classList.remove('hidden');
+        document.getElementById('view-multi').classList.remove('hidden');
+        renderMultiView();
+      } else if (viewName.startsWith('tv')) {
+        document.body.classList.add('tv-lock-screen');
+        document.getElementById('mainNav').classList.add('hidden');
+        document.getElementById('view-tv').classList.remove('hidden');
+        renderTVView(viewName);
+      }
+
+      window.location.hash = viewName;
+    }
+
+    function renderTVView(tvKey) {
+      const container = document.getElementById('tvContainer');
+      container.innerHTML = generateBoardHTML(tvKey, false);
+    }
+
+    function renderMultiView() {
+      for (let i = 1; i <= 8; i++) {
+        const el = document.getElementById(`quad-tv${i}`);
+        if (el) {
+          el.innerHTML = generateBoardHTML(`tv${i}`, true);
+        }
+      }
+    }
+
+    function filterMultiGrid(category) {
+      const cards = document.querySelectorAll('.multi-card');
+      cards.forEach(card => {
+        if (category === 'all') {
+          card.classList.remove('hidden');
+        } else if (category === 'dip') {
+          card.classList.toggle('hidden', !card.classList.contains('tv-card-dip'));
+        } else if (category === 'lasting') {
+          card.classList.toggle('hidden', !card.classList.contains('tv-card-lasting'));
+        } else if (category === 'sewing') {
+          card.classList.toggle('hidden', !card.classList.contains('tv-card-sewing'));
+        }
+      });
+
+      ['all', 'dip', 'lasting', 'sewing'].forEach(cat => {
+        const btn = document.getElementById(`btn-filter-${cat}`);
+        if (btn) {
+          if (cat === category) {
+            btn.className = "px-2 py-1 rounded bg-blue-600 text-white font-bold text-[11px] whitespace-nowrap";
+          } else {
+            btn.className = "px-2 py-1 rounded text-slate-300 hover:text-white text-[11px] whitespace-nowrap";
+          }
+        }
+      });
+    }
+
+    function openStandaloneTV(tvKey) {
+      const config = localStorage.getItem('andon_firebase_config') || STATIC_FIREBASE_DB_URL;
+      let url = window.location.origin + window.location.pathname;
+      if (config) {
+        const encoded = encodeURIComponent(btoa(config));
+        url += `?fb=${encoded}`;
+      }
+      url += '#' + tvKey;
+      window.open(url, `TV_DISPLAY_${tvKey.toUpperCase()}`, 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.warn('Fullscreen denied:', err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    function initBrandingElements() {
+      const navLogo = document.getElementById('navLogoPlaceholder');
+      if (navLogo) navLogo.innerHTML = getOmcLogoComponent('h-6 sm:h-7');
+      const entryLogo = document.getElementById('entryLogoPreview');
+      if (entryLogo) entryLogo.innerHTML = getOmcLogoComponent('h-8');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      initBrandingElements();
+      initCloudSync();
+
+      const hash = window.location.hash.replace('#', '');
+      if (['tv1', 'tv2', 'tv3', 'tv4', 'tv5', 'tv6', 'tv7', 'tv8', 'multi', 'entry'].includes(hash)) {
+        switchView(hash);
+      } else {
+        switchView('entry');
+      }
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['tv1', 'tv2', 'tv3', 'tv4', 'tv5', 'tv6', 'tv7', 'tv8', 'multi', 'entry'].includes(hash)) {
+        switchView(hash);
+      }
+    });
+
+    // Adaptive auto-render on screen orientation or window resize
+    window.addEventListener('resize', () => {
+      if (currentView.startsWith('tv')) {
+        renderTVView(currentView);
+      } else if (currentView === 'multi') {
+        renderMultiView();
+      }
+    });
+  </script>
+</body>
+</html>
