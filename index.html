@@ -7,16 +7,17 @@
 
   <!-- Chosen Palette: Industrial Factory Andon High Contrast (Red, Blue, Yellow, Cyan, Dark Navy Slate) -->
   <!-- Application Structure Plan:
-       1. Main Header: Navigation bar for switching between Master Data Entry, 8-TV Control Room Grid, and individual Standalone Fullscreen TV Views (TV1 to TV8).
+       1. Main Header: Navigation bar for switching between Master Data Entry, 8-TV Control Room Grid, and individual Standalone Fullscreen TV Views (TV1 to TV8), featuring live system time.
        2. Master Entry View: Form controls, shift selector, layout toggles (With IE / Standard), line row tables with efficiency auto-calculators, date controls, and cloud sync status.
-       3. Single TV Display View: Strict zero-scroll full-viewport Andon board with exact 7-column layout, high-contrast industrial colors, 8-second refresh ticker, dynamic date/shift headers, and animated best-line indicators.
-       4. 8-TV Control Room View: Multi-card grid displaying all 8 factory floor sections simultaneously with category filters (DIP, Lasting, Sewing).
+       3. Single TV Display View: Strict zero-scroll full-viewport Andon board with exact 7-column layout, dynamic live clock integrated in header, high-contrast industrial colors, 8-second refresh ticker, dynamic date/shift headers, and animated thumbs-up best-line indicators.
+       4. 8-TV Control Room View: Multi-card grid displaying all 8 factory floor sections simultaneously with category filters (DIP, Lasting, Sewing) and real-time live clock headers.
        5. Modals: Real-time Firebase Cloud Database setup and Daily Production Calendar Archive.
   -->
   <!-- Visualization & Content Choices:
        - 7-Column Andon Grid: Pure Native CSS Grid (10% 15% 15% 17% 15% 14% 14%) for exact column alignment across all Smart TV screen resolutions.
        - High-Contrast Palette: #ff0000 (Production Red), #3b68c4 (IE Blue), #ffee00 (Quality Yellow), #00b0f0 (Maintenance Cyan), #dbe3f0 (Alternating Row Blue).
-       - Canvas Rendering: Dynamic Canvas rendering for company logos and animated achievement badges to guarantee 100% vector clarity with ZERO SVG dependencies.
+       - Live Clock Header Integration: Dynamically synced JavaScript live clock printed directly into every TV board header with auto 1s tick.
+       - Thumbs-Up Emoji Animation: CSS @keyframes thumbsUpBounce applied to Best Line indicators (👍) for visual floor recognition.
        - State & Data Storage: Multi-screen state management via JavaScript objects with BroadcastChannel and Firebase Realtime Database cloud synchronization.
   -->
   <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
@@ -91,6 +92,9 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .text-center {
+      text-align: center !important;
+    }
 
     /* Buttons & Form Controls */
     button {
@@ -135,13 +139,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-    }
-    .brand-box {
-      background: #ffffff;
-      padding: 4px 8px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
     }
     .tag-badge {
       background-color: #dc2626;
@@ -308,6 +305,7 @@
       letter-spacing: 0.5px;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-dark);
+      text-align: center;
     }
     .data-table td {
       padding: 8px 12px;
@@ -394,16 +392,40 @@
       100% { width: 100%; opacity: 0.3; }
     }
 
-    /* Best Line Emoji Pulse */
-    @keyframes pulse-gentle {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
+    /* Dynamic Thumbs-Up Emoji Keyframe Animations */
+    @keyframes thumbsUpBounce {
+      0%, 100% {
+        transform: scale(1) rotate(0deg);
+      }
+      20% {
+        transform: scale(1.35) rotate(-15deg);
+      }
+      40% {
+        transform: scale(1.15) rotate(12deg);
+      }
+      60% {
+        transform: scale(1.28) rotate(-8deg);
+      }
+      80% {
+        transform: scale(1.08) rotate(5deg);
+      }
     }
-    .pulse-emoji-box {
+
+    .thumbs-up-animated {
+      display: inline-block;
+      animation: thumbsUpBounce 1.2s infinite ease-in-out;
+      transform-origin: bottom center;
+      filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.3));
+    }
+
+    .thumbs-up-badge-box {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      animation: pulse-gentle 2s infinite ease-in-out;
+      background: #fef08a;
+      border: 2px solid #eab308;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(234,179,8,0.4);
     }
 
     /* 8-TV Multi-Screen Grid */
@@ -518,12 +540,9 @@
       
       <!-- Brand & Section Info -->
       <div class="flex items-center gap-3">
-        <div class="brand-box">
-          <canvas id="navLogoCanvas" width="160" height="32" style="height: 28px; width: auto; display: block;"></canvas>
-        </div>
         <div>
           <div class="flex items-center gap-2">
-            <span style="font-size: 15px; font-weight: 900; letter-spacing: 0.5px;">OMC FOOTWEAR</span>
+            <span style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px; color: #60a5fa;">OMC FOOTWEAR</span>
             <span class="tag-badge">8-TV ANDON</span>
           </div>
           <p style="font-size: 11px; color: var(--text-muted);">Real-Time Floor Sync (2 DIP, 2 Lasting, 4 Sewing)</p>
@@ -553,7 +572,7 @@
           <span id="cloudStatusLabel">Cloud: Live Sync 🟢</span>
         </button>
         <button onclick="toggleFullscreen()" class="floating-btn" style="background:#334155;">⛶ Fullscreen</button>
-        <div id="liveClock" class="live-clock-badge">--:--:-- --</div>
+        <div id="liveClock" class="live-clock-badge tv-live-clock">--:--:-- --</div>
       </div>
 
     </div>
@@ -567,9 +586,6 @@
     <!-- Top Action Banner -->
     <div class="panel-card flex justify-between items-center" style="flex-wrap: wrap; gap: 16px;">
       <div class="flex items-center gap-3">
-        <div class="brand-box" style="padding: 6px 12px;">
-          <canvas id="entryLogoCanvas" width="180" height="40" style="height: 36px; width: auto; display: block;"></canvas>
-        </div>
         <div>
           <h2 style="font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
             <span>📊 OMC Central Floor Master Entry</span>
@@ -578,7 +594,7 @@
             </span>
           </h2>
           <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
-            Zero External Dependencies. 100% Pure Native CSS for all 8 Factory Displays.
+            Zero External Dependencies. Dynamic Live Clock Header & Animated Thumbs-Up Indicators.
           </p>
         </div>
       </div>
@@ -682,7 +698,7 @@
             Production Line Rows (<span id="lineRowCount" style="color: #34d399;">3</span> Active)
           </h3>
           <div class="flex gap-2">
-            <button onclick="autoCalculateEfficiency()" class="floating-btn" style="background:#4f46e5;">⚡ Auto Calc Eff & Best Line</button>
+            <button onclick="autoCalculateEfficiency()" class="floating-btn" style="background:#4f46e5;">👍 Auto Calc Eff & Best Line</button>
             <button onclick="addNewRow()" class="floating-btn" style="background:#059669;">+ Add Line</button>
           </div>
         </div>
@@ -697,7 +713,7 @@
                 <th>Achieved Eff %</th>
                 <th>Defect Rate %</th>
                 <th>Down Time (min)</th>
-                <th style="text-align: center;">Hourly Best?</th>
+                <th style="text-align: center;">Hourly Best 👍</th>
                 <th style="text-align: center;">Action</th>
               </tr>
             </thead>
@@ -881,50 +897,6 @@
   <script>
     const channel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('andon_tv_sync') : null;
     const STATIC_FIREBASE_DB_URL = "https://omc-footwear-limited-default-rtdb.firebaseio.com";
-
-    /* Render Canvas Logo with Zero SVG Dependency */
-    function drawOmcLogoToCanvas(canvasId, targetHeight = 32) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      // Circle Icon
-      const cy = h / 2;
-      const cx = cy + 2;
-      const radius = cy - 4;
-
-      ctx.fillStyle = '#283593';
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Inner Symbol
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#283593';
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.3, 0, Math.PI * 2);
-      ctx.fill();
-
-      // OMC Text
-      ctx.fillStyle = '#283593';
-      ctx.font = `900 ${Math.floor(h * 0.7)}px Arial, sans-serif`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('OMC', cx + radius + 8, cy - 2);
-
-      // Footwear Subtitle
-      ctx.font = `700 ${Math.floor(h * 0.28)}px Arial, sans-serif`;
-      ctx.fillText('FOOTWEAR', cx + radius + 10, h - 4);
-    }
 
     function showToast(message, type = 'success') {
       const toast = document.getElementById('appToast');
@@ -1362,11 +1334,12 @@
       closeCalendarModal();
     }
 
+    /* Live Clock Synchronizer for Nav, Floating Controls, and TV Headers */
     function updateClock() {
       const timeStr12h = getFormattedTime12h();
-      const clockEl = document.getElementById('liveClock');
-      if (clockEl) clockEl.textContent = timeStr12h;
-      document.querySelectorAll('.tv-live-clock').forEach(el => el.textContent = timeStr12h);
+      document.querySelectorAll('.tv-live-clock').forEach(el => {
+        el.textContent = timeStr12h;
+      });
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -1557,6 +1530,7 @@
       const shift = tv.shift || 'Shift - A';
       const title = tv.title || 'Production';
       const formattedDate = formatDisplayDate(selectedDate);
+      const currentTimeStr = getFormattedTime12h();
 
       const displayRows = [...rows];
       while (displayRows.length < 3) {
@@ -1566,11 +1540,13 @@
       // Responsive font sizing calculations for Smart TVs
       const baseNumSize = isCompact ? '13px' : (displayRows.length <= 4 ? '5.5vh' : '4vh');
       const headerHeight = isCompact ? '42px' : '13vh';
-      const headerTitleSize = isCompact ? '11px' : '4.5vh';
+      const headerTitleSize = isCompact ? '11px' : '4.2vh';
+      const dualTitleSize = isCompact ? '9.5px' : '2.85vh';
       const headerSubSize = isCompact ? '8px' : '2vh';
       const subHeaderHeight = isCompact ? '26px' : '6vh';
       const subHeaderFontSize = isCompact ? '8px' : '1.8vh';
-      const bestBoxSize = isCompact ? '22px' : '6.5vh';
+      const thumbsBoxSize = isCompact ? '22px' : '6.5vh';
+      const thumbsEmojiSize = isCompact ? '12px' : '3.8vh';
 
       let topHeaderCols = '';
 
@@ -1587,27 +1563,30 @@
           subTitle = parts.slice(1).join(' ').trim();
         }
 
+        const titleFontSize = subTitle ? dualTitleSize : headerTitleSize;
+
         topHeaderCols = `
           <div class="andon-grid tv-border-b" style="height: ${headerHeight};">
-            <div class="bg-white tv-border-r flex items-center justify-center tv-font-num" style="font-size: ${headerTitleSize}; color:#000;">
+            <div class="bg-white tv-border-r flex items-center justify-center tv-font-num text-center" style="font-size: ${headerTitleSize}; color:#000; text-align: center;">
               ${hour}
             </div>
-            <div class="bg-prod-red tv-border-r flex flex-col items-center justify-center" style="grid-column: span 2; padding: 2px;">
-              <span class="truncate w-full text-center" style="font-size: ${headerTitleSize}; font-weight: 900; line-height: 1;">${mainTitle}</span>
-              ${subTitle ? `<span class="truncate w-full text-center" style="font-size: ${headerSubSize}; font-weight: 700; margin-top: 2px;">${subTitle}</span>` : ''}
+            <div class="bg-prod-red tv-border-r flex flex-col items-center justify-center text-center" style="grid-column: span 2; padding: 2px; text-align: center;">
+              <span class="truncate w-full text-center" style="font-size: ${titleFontSize}; font-weight: 900; line-height: 1.15; text-align: center; display: block;">${mainTitle}</span>
+              ${subTitle ? `<span class="truncate w-full text-center" style="font-size: ${titleFontSize}; font-weight: 900; line-height: 1.15; margin-top: 3px; text-align: center; display: block;">${subTitle}</span>` : ''}
             </div>
-            <div class="bg-ie-blue tv-border-r flex items-center justify-center" style="font-size: ${headerTitleSize}; font-weight: 900;">
+            <div class="bg-ie-blue tv-border-r flex items-center justify-center text-center" style="font-size: ${headerTitleSize}; font-weight: 900; text-align: center;">
               IE
             </div>
-            <div class="bg-quality-yellow tv-border-r flex items-center justify-center" style="font-size: ${headerTitleSize}; font-weight: 900;">
+            <div class="bg-quality-yellow tv-border-r flex items-center justify-center text-center" style="font-size: ${headerTitleSize}; font-weight: 900; text-align: center;">
               Quality
             </div>
-            <div class="bg-maint-cyan tv-border-r flex items-center justify-center" style="font-size: ${headerSubSize}; font-weight: 900; text-transform: uppercase; text-align: center;">
+            <div class="bg-maint-cyan tv-border-r flex items-center justify-center text-center" style="font-size: ${headerSubSize}; font-weight: 900; text-transform: uppercase; text-align: center; line-height: 1.2;">
               Maintenance
             </div>
-            <div class="bg-white flex flex-col items-center justify-center" style="padding: 2px;">
-              <div style="font-size: ${headerSubSize}; font-weight: 900; color: #1e3a8a; text-transform: uppercase;">OMC FOOTWEAR</div>
-              <div style="font-size: ${subHeaderFontSize}; font-weight: 900; color: #1e293b; margin-top: 2px; text-transform: uppercase; display: flex; gap: 4px; align-items: center;">
+            <div class="bg-white flex flex-col items-center justify-center text-center" style="padding: 2px; text-align: center;">
+              <div style="font-size: ${headerSubSize}; font-weight: 900; color: #1e3a8a; text-transform: uppercase; letter-spacing:0.5px; text-align: center;">OMC FOOTWEAR</div>
+              <div class="tv-live-clock tv-font-num" style="font-size: ${headerSubSize}; font-weight: 900; color: #0284c7; margin-top: 1px; text-align: center;">${currentTimeStr}</div>
+              <div style="font-size: ${subHeaderFontSize}; font-weight: 800; color: #334155; margin-top: 1px; text-transform: uppercase; display: flex; gap: 4px; align-items: center; justify-content: center; text-align: center;">
                 <span style="color: #1e3a8a;">${formattedDate}</span>
                 <span>|</span>
                 <span>${shift}</span>
@@ -1616,23 +1595,34 @@
           </div>
         `;
       } else {
+        let mainTitle = title;
+        let subTitle = '';
+        if (title.includes('(')) {
+          const parts = title.split('(');
+          mainTitle = parts[0].trim();
+          subTitle = '(' + parts.slice(1).join('(').replace(/\)$/, '').trim() + ')';
+        }
+        const titleFontSize = subTitle ? dualTitleSize : headerTitleSize;
+
         topHeaderCols = `
           <div class="andon-grid tv-border-b" style="height: ${headerHeight};">
-            <div class="bg-white tv-border-r flex items-center justify-center tv-font-num" style="font-size: ${headerTitleSize}; color:#000;">
+            <div class="bg-white tv-border-r flex items-center justify-center tv-font-num text-center" style="font-size: ${headerTitleSize}; color:#000; text-align: center;">
               ${hour}
             </div>
-            <div class="bg-prod-red tv-border-r flex items-center justify-center" style="grid-column: span 3; padding: 2px;">
-              <span class="truncate w-full text-center" style="font-size: ${headerTitleSize}; font-weight: 900;">${title}</span>
+            <div class="bg-prod-red tv-border-r flex flex-col items-center justify-center text-center" style="grid-column: span 3; padding: 2px; text-align: center;">
+              <span class="truncate w-full text-center" style="font-size: ${titleFontSize}; font-weight: 900; line-height: 1.15; text-align: center; display: block;">${mainTitle}</span>
+              ${subTitle ? `<span class="truncate w-full text-center" style="font-size: ${titleFontSize}; font-weight: 900; line-height: 1.15; margin-top: 3px; text-align: center; display: block;">${subTitle}</span>` : ''}
             </div>
-            <div class="bg-quality-yellow tv-border-r flex items-center justify-center" style="font-size: ${headerTitleSize}; font-weight: 900;">
+            <div class="bg-quality-yellow tv-border-r flex items-center justify-center text-center" style="font-size: ${headerTitleSize}; font-weight: 900; text-align: center;">
               Quality
             </div>
-            <div class="bg-maint-cyan tv-border-r flex items-center justify-center" style="font-size: ${headerSubSize}; font-weight: 900; text-transform: uppercase; text-align: center;">
+            <div class="bg-maint-cyan tv-border-r flex items-center justify-center text-center" style="font-size: ${headerSubSize}; font-weight: 900; text-transform: uppercase; text-align: center; line-height: 1.2;">
               Maintenance
             </div>
-            <div class="bg-white flex flex-col items-center justify-center" style="padding: 2px;">
-              <div style="font-size: ${headerSubSize}; font-weight: 900; color: #1e3a8a; text-transform: uppercase;">OMC FOOTWEAR</div>
-              <div style="font-size: ${subHeaderFontSize}; font-weight: 900; color: #1e293b; margin-top: 2px; text-transform: uppercase; display: flex; gap: 4px; align-items: center;">
+            <div class="bg-white flex flex-col items-center justify-center text-center" style="padding: 2px; text-align: center;">
+              <div style="font-size: ${headerSubSize}; font-weight: 900; color: #1e3a8a; text-transform: uppercase; letter-spacing:0.5px; text-align: center;">OMC FOOTWEAR</div>
+              <div class="tv-live-clock tv-font-num" style="font-size: ${headerSubSize}; font-weight: 900; color: #0284c7; margin-top: 1px; text-align: center;">${currentTimeStr}</div>
+              <div style="font-size: ${subHeaderFontSize}; font-weight: 800; color: #334155; margin-top: 1px; text-transform: uppercase; display: flex; gap: 4px; align-items: center; justify-content: center; text-align: center;">
                 <span style="color: #1e3a8a;">${formattedDate}</span>
                 <span>|</span>
                 <span>${shift}</span>
@@ -1643,14 +1633,14 @@
       }
 
       const subHeader = `
-        <div class="andon-grid bg-black tv-border-b" style="height: ${subHeaderHeight}; color: #ffffff; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Line</div>
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Achieved</div>
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Target</div>
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Efficiency</div>
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Defect</div>
-          <div class="flex items-center justify-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize};">Down Time</div>
-          <div class="flex items-center justify-center" style="font-size: ${subHeaderFontSize};">Best Line</div>
+        <div class="andon-grid bg-black tv-border-b" style="height: ${subHeaderHeight}; color: #ffffff; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; text-align: center;">
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Line</div>
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Achieved</div>
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Target</div>
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Efficiency</div>
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Defect</div>
+          <div class="flex items-center justify-center text-center" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; text-align: center;">Down Time</div>
+          <div class="flex items-center justify-center text-center" style="font-size: ${subHeaderFontSize}; text-align: center;">Best Line 👍</div>
         </div>
       `;
 
@@ -1676,8 +1666,8 @@
         }
 
         const bestBadge = r.isBest ? `
-          <div class="pulse-emoji-box" style="width:${bestBoxSize}; height:${bestBoxSize}; background:#ffcc00; border-radius:50%; border:2px solid #d99b00; display:flex; align-items:center; justify-content:center; font-size:${isCompact ? '12px' : '2.5vh'}; font-weight:bold; color:#000;">
-            ⭐
+          <div class="thumbs-up-badge-box" style="width:${thumbsBoxSize}; height:${thumbsBoxSize};">
+            <span class="thumbs-up-animated" style="font-size:${thumbsEmojiSize};">👍</span>
           </div>
         ` : '';
 
@@ -1756,6 +1746,7 @@
     function renderTVView(tvKey) {
       const container = document.getElementById('tvContainer');
       if (container) container.innerHTML = generateBoardHTML(tvKey, false);
+      updateClock();
     }
 
     function renderMultiView() {
@@ -1763,6 +1754,7 @@
         const el = document.getElementById(`quad-tv${i}`);
         if (el) el.innerHTML = generateBoardHTML(`tv${i}`, true);
       }
+      updateClock();
     }
 
     function filterMultiGrid(category) {
@@ -1790,8 +1782,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
-      drawOmcLogoToCanvas('navLogoCanvas', 32);
-      drawOmcLogoToCanvas('entryLogoCanvas', 40);
       initCloudSync();
 
       const hash = window.location.hash.replace('#', '');
@@ -1810,8 +1800,6 @@
     });
 
     window.addEventListener('resize', () => {
-      drawOmcLogoToCanvas('navLogoCanvas', 32);
-      drawOmcLogoToCanvas('entryLogoCanvas', 40);
       if (currentView.startsWith('tv')) renderTVView(currentView);
       else if (currentView === 'multi') renderMultiView();
     });
