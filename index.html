@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>OMC Footwear - Production TV Display System (8 TVs: DIP, Lasting & Sewing)</title>
 
-  <!-- Industrial Factory Andon High Contrast (Red, Blue, Yellow, Cyan, Dark Navy Slate) -->
   <!-- Firebase SDKs for Real-Time Multi-Device Cloud Sync -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
@@ -462,7 +461,9 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -525,6 +526,11 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <div id="currentUserBadge" style="background:#0f172a; border:1px solid #334155; padding:5px 10px; border-radius:6px; font-size:11px; display:flex; align-items:center; gap:6px;">
+          <span>👤</span>
+          <strong id="loggedUserRoleLabel" style="color:#38bdf8;">Guest</strong>
+        </div>
+        <button onclick="openLoginModal()" class="floating-btn" style="background:#1e40af;" title="Login with Role">🔐 Login</button>
         <button onclick="openCloudModal()" id="cloudStatusBtn" class="status-btn" title="OMC Cloud Sync">
           <span id="cloudStatusDot" class="pulse-dot"></span>
           <span id="cloudStatusLabel">Cloud: Live Sync 🟢</span>
@@ -645,7 +651,7 @@
           </h3>
           <div class="flex gap-2">
             <button onclick="autoCalculateEfficiency()" class="floating-btn" style="background:#4f46e5;">👍 Auto Calc Eff & Best Line</button>
-            <button onclick="addNewRow()" class="floating-btn" style="background:#059669;">+ Add Line</button>
+            <button onclick="addNewRow()" class="floating-btn" style="background:#059669;" id="btnAddLine">+ Add Line</button>
           </div>
         </div>
 
@@ -672,7 +678,6 @@
         <div class="flex items-center gap-2">
           <button onclick="saveCurrentTabData(true)" class="floating-btn" style="background:#059669; font-size: 13px; padding: 8px 16px;">💾 Save & Broadcast</button>
           <button onclick="openCloudModal()" class="floating-btn" style="background:#2563eb;">☁️ Cloud Config</button>
-          <button onclick="resetDefaultData()" class="floating-btn" style="background:#475569;">Reset Default Sample</button>
         </div>
         <div class="flex items-center gap-2">
           <span id="saveStatus" style="font-size: 11px; padding: 6px 12px; background: rgba(6,78,59,0.8); border: 1px solid #059669; color: #34d399; border-radius: 6px;">
@@ -777,6 +782,39 @@
     </div>
   </section>
 
+  <div id="loginModal" class="modal-backdrop hidden">
+    <div class="modal-box flex flex-col gap-4" style="max-width: 420px;">
+      <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
+        <h3 style="font-size: 16px; font-weight: bold; color: #ffffff;">🔐 OMC System Authentication</h3>
+        <button onclick="closeLoginModal()" style="font-size: 18px; color: var(--text-muted); background: none;">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+        Select your user role and enter the system access password to unlock editing capabilities.
+      </p>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-muted);">Select User Type:</label>
+          <select id="loginRoleSelect" style="width: 100%; padding: 8px;">
+            <option value="superuser">👑 Superuser (Full Control)</option>
+            <option value="editor">✏️ Editor (Data Entry & Sync)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-muted);">Password:</label>
+          <input type="password" id="loginPasswordInput" placeholder="Enter password..." style="width: 100%; padding: 8px;" onkeydown="if(event.key==='Enter') verifyAndLogin()">
+        </div>
+        <div id="loginErrorMsg" style="color: #f87171; font-size: 11px; font-weight: bold; display: none;"></div>
+      </div>
+      <div class="flex justify-between items-center" style="padding-top: 8px; border-top: 1px solid var(--border-dark);">
+        <button onclick="logoutSystem()" class="floating-btn" style="background:#475569;">Lock / Logout</button>
+        <div class="flex gap-2">
+          <button onclick="closeLoginModal()" class="floating-btn" style="background:#334155;">Cancel</button>
+          <button onclick="verifyAndLogin()" class="floating-btn" style="background:#2563eb; padding: 6px 16px;">Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="cloudModal" class="modal-backdrop hidden">
     <div class="modal-box flex flex-col gap-4">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
@@ -819,6 +857,8 @@
     const channel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('andon_tv_sync') : null;
     const STATIC_FIREBASE_DB_URL = "https://omc-footwear-limited-default-rtdb.firebaseio.com";
 
+    let currentUserRole = 'guest'; // 'guest', 'editor', 'superuser'
+
     function showToast(message, type = 'success') {
       const toast = document.getElementById('appToast');
       const icon = document.getElementById('appToastIcon');
@@ -839,6 +879,72 @@
 
       toast.style.display = 'flex';
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function openLoginModal() {
+      const modal = document.getElementById('loginModal');
+      const passInput = document.getElementById('loginPasswordInput');
+      const err = document.getElementById('loginErrorMsg');
+      if (passInput) passInput.value = '';
+      if (err) err.style.display = 'none';
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function verifyAndLogin() {
+      const roleSelect = document.getElementById('loginRoleSelect');
+      const passInput = document.getElementById('loginPasswordInput');
+      const err = document.getElementById('loginErrorMsg');
+      const role = roleSelect.value;
+      const pass = passInput.value.trim();
+
+      let valid = false;
+      if (role === 'superuser' && pass === 'Omc@123') {
+        valid = true;
+      } else if (role === 'editor' && pass === 'Omc999') {
+        valid = true;
+      }
+
+      if (valid) {
+        currentUserRole = role;
+        localStorage.setItem('omc_current_user_role', role);
+        updateUserRoleUI();
+        closeLoginModal();
+        showToast(`Logged in successfully as ${role.toUpperCase()}!`, "success");
+      } else {
+        if (err) {
+          err.textContent = "Incorrect password! Superuser password is Omc@123, Editor password is Omc999.";
+          err.style.display = 'block';
+        }
+      }
+    }
+
+    function logoutSystem() {
+      currentUserRole = 'guest';
+      localStorage.setItem('omc_current_user_role', 'guest');
+      updateUserRoleUI();
+      closeLoginModal();
+      showToast("Logged out to Guest mode.", "info");
+    }
+
+    function updateUserRoleUI() {
+      const label = document.getElementById('loggedUserRoleLabel');
+      if (!label) return;
+
+      if (currentUserRole === 'superuser') {
+        label.textContent = "Superuser 👑";
+        label.style.color = "#fde047";
+      } else if (currentUserRole === 'editor') {
+        label.textContent = "Editor ✏️";
+        label.style.color = "#38bdf8";
+      } else {
+        label.textContent = "Guest (Read Only)";
+        label.style.color = "#94a3b8";
+      }
     }
 
     function formatDateYMD(date = new Date()) {
@@ -1099,6 +1205,9 @@
 
     function loadData() {
       try {
+        const storedRole = localStorage.getItem('omc_current_user_role');
+        if (storedRole) currentUserRole = storedRole;
+
         const storedHistory = localStorage.getItem('andon_calendar_history_db');
         historyDB = storedHistory ? JSON.parse(storedHistory) : {};
         selectedDate = localStorage.getItem('andon_active_date') || formatDateYMD(new Date());
@@ -1122,9 +1231,16 @@
         appData = JSON.parse(JSON.stringify(defaultData));
       }
       updateDateControlsUI();
+      updateUserRoleUI();
     }
 
     function saveHistoryToStorage(broadcast = true) {
+      if (currentUserRole === 'guest') {
+        showToast("Guest mode: Changes cannot be saved. Please login as Editor or Superuser.", "warn");
+        openLoginModal();
+        return;
+      }
+
       try {
         historyDB[selectedDate] = appData;
         localStorage.setItem('andon_calendar_history_db', JSON.stringify(historyDB));
@@ -1161,13 +1277,13 @@
 
     function changeActiveDate(newDateStr) {
       if (!newDateStr) return;
-      autoSave();
+      if (currentUserRole !== 'guest') autoSave();
       selectedDate = newDateStr;
       if (!historyDB[selectedDate]) {
         historyDB[selectedDate] = JSON.parse(JSON.stringify(appData || defaultData));
       }
       appData = historyDB[selectedDate];
-      saveHistoryToStorage(true);
+      if (currentUserRole !== 'guest') saveHistoryToStorage(true);
       updateDateControlsUI();
       loadTabToForm(activeTab);
 
@@ -1189,6 +1305,10 @@
     }
 
     function copyFromPreviousDay() {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const curr = new Date(selectedDate);
       curr.setDate(curr.getDate() - 1);
       const prevDateStr = formatDateYMD(curr);
@@ -1323,23 +1443,29 @@
       container.innerHTML = '';
       document.getElementById('lineRowCount').textContent = rows.length;
 
+      const isReadOnly = (currentUserRole === 'guest');
+
       rows.forEach((row, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><input type="text" value="${row.line}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'line', this.value)" style="width:70px; text-align:center; font-weight:bold;"></td>
-          <td><input type="number" value="${row.achievement}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'achievement', parseFloat(this.value)||0)" style="width:90px; font-weight:bold;"></td>
-          <td><input type="number" value="${row.target}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'target', parseFloat(this.value)||0)" style="width:90px; font-weight:bold;"></td>
-          <td><input type="number" step="0.1" value="${row.efficiency}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'efficiency', parseFloat(this.value)||0)" style="width:75px; color:#34d399; font-weight:bold;"> %</td>
-          <td><input type="number" step="0.01" value="${row.defectRate}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'defectRate', parseFloat(this.value)||0)" style="width:75px; color:#fbbf24; font-weight:bold;"> %</td>
-          <td><input type="number" value="${row.downTime}" onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'downTime', parseInt(this.value)||0)" style="width:65px;"> m</td>
-          <td style="text-align:center;"><input type="checkbox" ${row.isBest ? 'checked' : ''} onchange="setBestLine(${idx}, this.checked)" style="transform:scale(1.3); cursor:pointer;"></td>
-          <td style="text-align:center;"><button onclick="removeRow(${idx})" style="background:none; color:#f87171; font-weight:bold; font-size:14px;">✕</button></td>
+          <td><input type="text" value="${row.line}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'line', this.value)" style="width:70px; text-align:center; font-weight:bold;"></td>
+          <td><input type="number" value="${row.achievement}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'achievement', parseFloat(this.value)||0)" style="width:90px; font-weight:bold;"></td>
+          <td><input type="number" value="${row.target}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'target', parseFloat(this.value)||0)" style="width:90px; font-weight:bold;"></td>
+          <td><input type="number" step="0.1" value="${row.efficiency}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'efficiency', parseFloat(this.value)||0)" style="width:75px; color:#34d399; font-weight:bold;"> %</td>
+          <td><input type="number" step="0.01" value="${row.defectRate}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'defectRate', parseFloat(this.value)||0)" style="width:75px; color:#fbbf24; font-weight:bold;"> %</td>
+          <td><input type="number" value="${row.downTime}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'downTime', parseInt(this.value)||0)" style="width:65px;"> m</td>
+          <td style="text-align:center;"><input type="checkbox" ${row.isBest ? 'checked' : ''} ${isReadOnly ? 'disabled' : ''} onchange="setBestLine(${idx}, this.checked)" style="transform:scale(1.3); cursor:pointer;"></td>
+          <td style="text-align:center;"><button onclick="removeRow(${idx})" ${isReadOnly ? 'disabled' : ''} style="background:none; color:#f87171; font-weight:bold; font-size:14px; ${isReadOnly ? 'opacity:0.4;' : ''}">✕</button></td>
         `;
         container.appendChild(tr);
       });
     }
 
     function updateRowField(index, field, value) {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const key = `tv${activeTab}`;
       if (appData[key] && appData[key].rows[index]) {
         appData[key].rows[index][field] = value;
@@ -1348,6 +1474,10 @@
     }
 
     function setBestLine(index, checked) {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const key = `tv${activeTab}`;
       if (!appData[key]) return;
       if (checked) {
@@ -1360,6 +1490,10 @@
     }
 
     function addNewRow() {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const key = `tv${activeTab}`;
       const prefix = (activeTab === 5 || activeTab === 6) ? 'L-' : '';
       const rowCount = appData[key].rows.length;
@@ -1377,6 +1511,10 @@
     }
 
     function removeRow(index) {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const key = `tv${activeTab}`;
       if (appData[key] && appData[key].rows.length > 1) {
         appData[key].rows.splice(index, 1);
@@ -1386,6 +1524,10 @@
     }
 
     function autoCalculateEfficiency() {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       const key = `tv${activeTab}`;
       const rows = appData[key].rows;
       if (!rows || rows.length === 0) return;
@@ -1412,6 +1554,7 @@
     }
 
     function autoSave() {
+      if (currentUserRole === 'guest') return;
       const key = `tv${activeTab}`;
       if (!appData[key]) return;
       appData[key].title = document.getElementById('entry-title').value.trim();
@@ -1422,6 +1565,10 @@
     }
 
     function saveCurrentTabData(showFeedback = false) {
+      if (currentUserRole === 'guest') {
+        openLoginModal();
+        return;
+      }
       autoSave();
       countdownSec = AUTO_REFRESH_SECONDS;
       if (showFeedback) {
@@ -1429,13 +1576,6 @@
         badge.textContent = `✅ Saved! Broadcasted to All TVs`;
         setTimeout(() => { badge.textContent = "Auto-Sync: 8s"; }, 2200);
       }
-    }
-
-    function resetDefaultData() {
-      appData = JSON.parse(JSON.stringify(defaultData));
-      saveHistoryToStorage(true);
-      loadTabToForm(activeTab);
-      showToast("Reset to sample default layout", "info");
     }
 
     function generateBoardHTML(tvKey, isCompact = false) {
@@ -1453,7 +1593,6 @@
         displayRows.push({ line: '', achievement: '', target: '', efficiency: '', defectRate: '', downTime: '', isBest: false, isEmpty: true });
       }
 
-      // Proportional responsive sizing tailored for crisp smart TV & card grid viewing
       const baseNumSize = isCompact ? '15px' : (displayRows.length <= 4 ? '5.5vh' : '4vh');
       const headerHeight = isCompact ? '48px' : '13vh';
       const headerTitleSize = isCompact ? '12px' : '4.2vh';
