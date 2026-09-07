@@ -911,13 +911,14 @@
 
       if (valid) {
         currentUserRole = role;
-        localStorage.setItem('omc_current_user_role', role);
+        // Using sessionStorage so the account is automatically signed out when tab/browser window is closed
+        sessionStorage.setItem('omc_current_user_role', role);
         updateUserRoleUI();
         closeLoginModal();
         showToast(`Logged in successfully as ${role.toUpperCase()}!`, "success");
       } else {
         if (err) {
-          err.textContent = "Incorrect password! Superuser password is Omc@123, Editor password is Omc999.";
+          err.textContent = "Incorrect Password! Try Again.";
           err.style.display = 'block';
         }
       }
@@ -925,7 +926,7 @@
 
     function logoutSystem() {
       currentUserRole = 'guest';
-      localStorage.setItem('omc_current_user_role', 'guest');
+      sessionStorage.setItem('omc_current_user_role', 'guest');
       updateUserRoleUI();
       closeLoginModal();
       showToast("Logged out to Guest mode.", "info");
@@ -1205,7 +1206,7 @@
 
     function loadData() {
       try {
-        const storedRole = localStorage.getItem('omc_current_user_role');
+        const storedRole = sessionStorage.getItem('omc_current_user_role');
         if (storedRole) currentUserRole = storedRole;
 
         const storedHistory = localStorage.getItem('andon_calendar_history_db');
