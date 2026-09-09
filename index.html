@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>OMC Footwear - Production TV Display System (8 TVs: DIP, Lasting & Sewing)</title>
+  <title>OMC Footwear - Production TV Display System with Superuser RBAC</title>
 
   <!-- Firebase SDKs for Real-Time Multi-Device Cloud Sync -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -68,9 +68,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .text-center {
-      text-align: center !important;
-    }
+    .text-center { text-align: center !important; }
 
     button {
       font-family: inherit;
@@ -332,12 +330,8 @@
       box-sizing: border-box;
       overflow: hidden;
     }
-    .tv-border-r {
-      border-right: 2px solid #000000 !important;
-    }
-    .tv-border-b {
-      border-bottom: 2px solid #000000 !important;
-    }
+    .tv-border-r { border-right: 2px solid #000000 !important; }
+    .tv-border-b { border-bottom: 2px solid #000000 !important; }
     .tv-font-num {
       font-family: 'Segoe UI', Arial, sans-serif;
       font-weight: 800;
@@ -440,9 +434,7 @@
       opacity: 0.3;
       transition: opacity 0.2s ease;
     }
-    .floating-tv-bar:hover {
-      opacity: 1;
-    }
+    .floating-tv-bar:hover { opacity: 1; }
     .floating-btn {
       background-color: rgba(0, 0, 0, 0.85);
       color: #ffffff;
@@ -459,7 +451,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(15, 23, 42, 0.7);
+      background-color: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
@@ -473,24 +465,16 @@
       border: 1px solid var(--border-dark);
       border-radius: 12px;
       width: 100%;
-      max-width: 600px;
+      max-width: 680px;
       max-height: 90vh;
       overflow-y: auto;
       padding: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.8);
     }
 
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
   </style>
 </head>
 
@@ -524,9 +508,9 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- Superuser 1-Click Language Toggle Button -->
-        <button id="langToggleBtn" onclick="toggleLanguage()" class="floating-btn hidden" style="background:#b45309; border:1px solid #f59e0b; color:#fef3c7;" title="Switch Language (Superuser Only)">
-          🇧🇩 বাংলা (Bangla)
+        <!-- Superuser Access Control / User Management Button -->
+        <button id="superUserMgmtBtn" onclick="openUserManagementModal()" class="floating-btn superuser-only-control hidden" style="background:#7c3aed; border:1px solid #a855f7; color:#f3e8ff;" title="Manage Users, Create, Delete & Permissions (Superuser Only)">
+          👑 User Access Control
         </button>
 
         <div id="currentUserBadge" style="background:#0f172a; border:1px solid #334155; padding:5px 10px; border-radius:6px; font-size:11px; display:flex; align-items:center; gap:6px;">
@@ -586,9 +570,10 @@
           <button onclick="selectQuickDate('today')" id="btn-date-today" style="padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; background:#2563eb; color:#fff;">Today</button>
           <button onclick="selectQuickDate('yesterday')" id="btn-date-yesterday" style="padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; background:transparent; color:var(--text-muted);">Yesterday</button>
         </div>
-        <button onclick="openCalendarModal()" id="btnCalendarHist" class="floating-btn" style="background:#334155;">🗂️ Calendar History</button>
-        <button onclick="copyFromPreviousDay()" id="btnCopyYesterday" class="floating-btn" style="background:#4f46e5;">📋 Copy Yesterday Setup</button>
-        <button onclick="resetAllEntriesToZero()" id="btnResetAll" class="floating-btn" style="background:#dc2626; display:none;" title="Reset all entry values to zero (Super User Only)">🔄 Reset All to 0</button>
+        <button onclick="openCalendarModal()" id="btnCalendarHist" class="floating-btn superuser-action-btn hidden" style="background:#334155;">🗂️ Calendar History</button>
+        <button onclick="openUserHistoryModal()" id="btnUserHist" class="floating-btn superuser-action-btn hidden" style="background:#7c3aed;" title="Superuser Audit History">📋 User History</button>
+        <button onclick="copyFromPreviousDay()" id="btnCopyYesterday" class="floating-btn superuser-action-btn hidden" style="background:#4f46e5;">📋 Copy Yesterday Setup</button>
+        <button onclick="resetAllEntriesToZero()" id="btnResetAll" class="floating-btn superuser-action-btn hidden" style="background:#dc2626;" title="Reset all entry values to zero">🔄 Reset All to 0</button>
       </div>
       <div id="dateStatusBadge" style="font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 6px; background:#064e3b; color:#34d399; border: 1px solid #059669;">
         <span id="dateStatusText">Today's Live Floor</span>
@@ -655,7 +640,7 @@
           </h3>
           <div class="flex gap-2">
             <button onclick="autoCalculateEfficiency()" id="btnAutoCalc" class="floating-btn" style="background:#4f46e5;">👍 Auto Calc Eff & Best Line</button>
-            <button onclick="addNewRow()" id="btnAddLine" class="floating-btn" style="background:#059669;">+ Add Line</button>
+            <button onclick="addNewRow()" id="btnAddLine" class="floating-btn" style="background:#059669; display: none;">+ Add Line</button>
           </div>
         </div>
 
@@ -670,7 +655,7 @@
                 <th id="thDefRate">Defect Rate %</th>
                 <th id="thDownTime">Down Time (min)</th>
                 <th id="thHourlyBest" style="text-align: center;">Hourly Best 👍</th>
-                <th id="thAction" style="text-align: center;">Action</th>
+                <th id="thAction" class="superuser-only-col" style="text-align: center; display: none;">Action</th>
               </tr>
             </thead>
             <tbody id="entry-rows-container"></tbody>
@@ -785,7 +770,6 @@
       </div>
     </div>
   </section>
-
   <!-- Login Modal -->
   <div id="loginModal" class="modal-backdrop hidden">
     <div class="modal-box flex flex-col gap-4" style="max-width: 420px;">
@@ -794,15 +778,12 @@
         <button onclick="closeLoginModal()" style="font-size: 18px; color: var(--text-muted); background: none;">✕</button>
       </div>
       <p id="lblLoginModalSub" style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-        Select your user role and enter the system access password to unlock editing capabilities.
+        Enter your Username and Password to log in.
       </p>
       <div class="flex flex-col gap-3">
         <div>
-          <label id="lblSelectUserType" style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-muted);">Select User Type:</label>
-          <select id="loginRoleSelect" style="width: 100%; padding: 8px;">
-            <option value="superuser">👑 Superuser (Full Control)</option>
-            <option value="editor">✏️ Editor (Data Entry & Sync)</option>
-          </select>
+          <label style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-muted);">Username:</label>
+          <input type="text" id="loginUsernameInput" placeholder="Enter username..." style="width: 100%; padding: 8px;">
         </div>
         <div>
           <label id="lblPassword" style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-muted);">Password:</label>
@@ -820,7 +801,64 @@
     </div>
   </div>
 
-  <!-- Cloud Sync Modal -->
+  <div id="userManagementModal" class="modal-backdrop hidden">
+    <div class="modal-box flex flex-col gap-4" style="max-width: 750px;">
+      <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
+        <h3 style="font-size: 16px; font-weight: bold; color: #fde047;">👑 Superuser Access Control: User Management & Passwords</h3>
+        <button onclick="closeUserManagementModal()" style="font-size: 18px; color: var(--text-muted); background: none;">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+        Create new system accounts, assign roles (Superuser or Editor), modify passwords, or delete user accounts instantly.
+      </p>
+
+      <div style="background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; flex-direction: column; gap: 10px;">
+        <h4 style="font-size: 13px; font-weight: bold; color: #38bdf8;">➕ Create New System User</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+          <div>
+            <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 2px;">Username:</label>
+            <input type="text" id="newUsername" placeholder="username" style="width: 100%;">
+          </div>
+          <div>
+            <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 2px;">Password:</label>
+            <input type="password" id="newPassword" placeholder="password" style="width: 100%;">
+          </div>
+          <div>
+            <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 2px;">Role Access:</label>
+            <select id="newRole" style="width: 100%;">
+              <option value="editor">Editor</option>
+              <option value="superuser">Superuser</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button onclick="createNewUser()" class="floating-btn" style="background:#059669; width: 100%; padding: 7px;">Add User</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <h4 style="font-size: 13px; font-weight: bold; color: #f8fafc;">👥 Registered Users & Password Control</h4>
+        <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-dark); border-radius: 8px; background: #020617;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Password</th>
+                <th style="text-align:center;">Change Password</th>
+                <th style="text-align:center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="userListTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-700">
+        <button onclick="closeUserManagementModal()" class="floating-btn" style="background:#334155;">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div id="cloudModal" class="modal-backdrop hidden">
     <div class="modal-box flex flex-col gap-4">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
@@ -844,7 +882,6 @@
     </div>
   </div>
 
-  <!-- Calendar History Modal -->
   <div id="calendarModal" class="modal-backdrop hidden">
     <div class="modal-box flex flex-col gap-3" style="max-width: 650px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
@@ -852,6 +889,22 @@
         <button onclick="closeCalendarModal()" style="font-size: 18px; color: var(--text-muted); background: none;">✕</button>
       </div>
       <div id="calendarHistoryList" style="overflow-y: auto; max-height: 50vh; display: flex; flex-direction: column; gap: 6px;"></div>
+    </div>
+  </div>
+
+  <div id="userHistoryModal" class="modal-backdrop hidden">
+    <div class="modal-box flex flex-col gap-3" style="max-width: 750px;">
+      <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;">
+        <h3 id="lblUserHistModalTitle" style="font-size: 16px; font-weight: bold; color: #fde047;">📋 Superuser Audit & User Activity Log</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="clearUserHistory()" class="floating-btn" style="background:#dc2626; padding: 4px 8px; font-size: 10px;">🗑️ Clear Logs</button>
+          <button onclick="closeUserHistoryModal()" style="font-size: 18px; color: var(--text-muted); background: none;">✕</button>
+        </div>
+      </div>
+      <p style="font-size: 11px; color: var(--text-muted);">
+        Tracks all data entry saves, user creations, password modifications, deletions, and role logins performed across sessions.
+      </p>
+      <div id="userHistoryListContainer" style="overflow-y: auto; max-height: 55vh; display: flex; flex-direction: column; gap: 6px;"></div>
     </div>
   </div>
 
@@ -865,311 +918,27 @@
     const STATIC_FIREBASE_DB_URL = "https://omc-footwear-limited-default-rtdb.firebaseio.com";
 
     let currentUserRole = 'guest';
-    let currentLang = 'en'; // 'en' or 'bn'
+    let currentLoggedUsername = '';
+    let auditLogs = []; // Stores user action history
 
-    // Proper Bengali Translation Dictionary including "প্রোডাকশন-ডিআইপি"
-    const translations = {
-      en: {
-        brandSub: "Real-Time Floor Sync (2 DIP, 2 Lasting, 4 Sewing)",
-        navMasterEntry: "📝 Master Entry",
-        nav8TvGrid: "🖥️ 8-TV Grid",
-        navTv1: "TV1 (DIP-1)",
-        navTv2: "TV2 (DIP-2)",
-        navTv3: "TV3 (Sew-1)",
-        navTv4: "TV4 (Sew-2)",
-        navTv5: "TV5 (Last-1)",
-        navTv6: "TV6 (Last-2)",
-        navTv7: "TV7 (Sew-3)",
-        navTv8: "TV8 (Sew-4)",
-        loginBtn: "🔐 Login",
-        fullscreenBtn: "⛶ Fullscreen",
-        entryHeading: "📊 OMC Central Floor Master Entry",
-        entrySubHeading: "Zero External Dependencies. Dynamic Live Clock Header & Animated Thumbs-Up Indicators.",
-        quickTvLabel: "Open TV Screens in Separate Windows:",
-        btnTv1Quick: "TV 1 (DIP)",
-        btnTv2Quick: "TV 2 (DIP)",
-        btnTv5Quick: "TV 5 (Last)",
-        btnTv6Quick: "TV 6 (Last)",
-        btnTv3Quick: "TV 3 (Sew)",
-        btnTv4Quick: "TV 4 (Sew)",
-        btnTv7Quick: "TV 7 (Sew)",
-        btnTv8Quick: "TV 8 (Sew)",
-        labelDate: "📅 Date:",
-        btnToday: "Today",
-        btnYesterday: "Yesterday",
-        btnCalendarHist: "🗂️ Calendar History",
-        btnCopyYesterday: "📋 Copy Yesterday Setup",
-        btnResetAll: "🔄 Reset All to 0",
-        dateStatusToday: "Today's Live Floor",
-        tabDIP1: "TV 1: DIP 1",
-        tabDIP2: "TV 2: DIP 2",
-        tabSew1: "TV 3: Sewing 1",
-        tabSew2: "TV 4: Sewing 2",
-        tabLast1: "TV 5: Lasting 1",
-        tabLast2: "TV 6: Lasting 2",
-        tabSew3: "TV 7: Sewing 3",
-        tabSew4: "TV 8: Sewing 4",
-        lblTitleSec: "Display Title / Section",
-        lblCurrHour: "Current Production Hour",
-        lblShiftName: "Shift Name / Number",
-        lblHeaderStyle: "Header Layout Style",
-        lblProdLinesTitle: "Production Line Rows",
-        btnAutoCalc: "👍 Auto Calc Eff & Best Line",
-        btnAddLine: "+ Add Line",
-        thLineNo: "Line No",
-        thHourlyAch: "Hourly Achieved",
-        thNextPlan: "Next Plan Target",
-        thAchEff: "Achieved Eff %",
-        thDefRate: "Defect Rate %",
-        thDownTime: "Down Time (min)",
-        thHourlyBest: "Hourly Best 👍",
-        thAction: "Action",
-        btnSaveBroadcast: "💾 Save & Broadcast",
-        btnCloudConfig: "☁️ Cloud Config",
-        lblNextIn: "Next in",
-        exitFullTv: "Exit Full TV",
-        multiGridTitle: "🖥️ OMC 8-Screen Production Control Room",
-        lbl8TvsActive: "8 TVs Active",
-        filterAll: "All 8",
-        filterDip: "DIP (1-2)",
-        filterLasting: "Lasting (5-6)",
-        filterSewing: "Sewing (3,4,7,8)",
-        loginTitle: "🔐 OMC System Authentication",
-        loginSub: "Select your user role and enter the system access password to unlock editing capabilities.",
-        lblSelectUserType: "Select User Type:",
-        lblPassword: "Password:",
-        btnLogout: "Lock / Logout",
-        btnLoginCancel: "Cancel",
-        btnLoginSubmit: "Login",
-        cloudTitle: "☁️ OMC 8-TV Realtime Cloud Sync",
-        cloudSub: "Connected Realtime Database URL:",
-        lblFirebaseUrl: "Firebase Database URL:",
-        btnSaveConnect: "⚡ Save & Connect",
-        btnResetDefault: "Reset Default",
-        btnCopyLiveLink: "🔗 Copy Live TV Link",
-        calTitle: "📅 Daily Production Floor Calendar",
-        // TV specific labels
-        tvHeaderProd: "Production",
-        tvHeaderDIP: "Production-DIP",
-        tvHeaderSewing: "Production Sewing",
-        tvHeaderLasting: "Production Lasting",
-        tvHeaderIE: "IE",
-        tvHeaderQuality: "Quality",
-        tvHeaderMaint: "Maintenance",
-        tvHeaderOmc: "OMC FOOTWEAR",
-        tvSubAchieved: "Achieved",
-        tvSubTarget: "Target",
-        tvSubEff: "Efficiency",
-        tvSubDefect: "Defect",
-        tvSubDown: "Down Time",
-        tvSubBest: "Best Line 👍"
-      },
-      bn: {
-        brandSub: "রিয়েল-টাইম ফ্লোর সিঙ্ক (২ ডিপ, ২ লাস্টিং, ৪ সেলাই)",
-        navMasterEntry: "📝 মাস্টার এন্ট্রি",
-        nav8TvGrid: "🖥️ ৮-টিভি গ্রিড",
-        navTv1: "টিভি ১ (ডিপ-১)",
-        navTv2: "টিভি ২ (ডিপ-২)",
-        navTv3: "টিভি ৩ (সেলাই-১)",
-        navTv4: "টিভি ৪ (সেলাই-২)",
-        navTv5: "টিভি ৫ (লাস্টিং-১)",
-        navTv6: "টিভি ৬ (লাস্টিং-২)",
-        navTv7: "টিভি ৭ (সেলাই-৩)",
-        navTv8: "টিভি ৮ (সেলাই-৪)",
-        loginBtn: "🔐 লগইন",
-        fullscreenBtn: "⛶ ফুলস্ক্রিন",
-        entryHeading: "📊 ওএমসি সেন্ট্রাল ফ্লোর মাস্টার এন্ট্রি",
-        entrySubHeading: "ডায়নামিক লাইভ ক্লক হেডার এবং অ্যানিমেটেড থাবস-আপ ইন্ডিকেটর সহ।",
-        quickTvLabel: "আলাদা উইন্ডোতে টিভি স্ক্রিন খুলুন:",
-        btnTv1Quick: "টিভি ১ (ডিপ)",
-        btnTv2Quick: "টিভি ২ (ডিপ)",
-        btnTv5Quick: "টিভি ৫ (লাস্ট)",
-        btnTv6Quick: "টিভি ৬ (লাস্ট)",
-        btnTv3Quick: "টিভি ৩ (সেলাই)",
-        btnTv4Quick: "টিভি ৪ (সেলাই)",
-        btnTv7Quick: "টিভি ৭ (সেলাই)",
-        btnTv8Quick: "টিভি ৮ (সেলাই)",
-        labelDate: "📅 তারিখ:",
-        btnToday: "আজ",
-        btnYesterday: "গতকাল",
-        btnCalendarHist: "🗂️ ক্যালেন্ডার ইতিহাস",
-        btnCopyYesterday: "📋 গতকালের সেটআপ কপি করুন",
-        btnResetAll: "🔄 সব ০ এ রিসেট করুন",
-        dateStatusToday: "আজকের লাইভ ফ্লোর",
-        tabDIP1: "টিভি ১: ডিপ ১",
-        tabDIP2: "টিভি ২: ডিপ ২",
-        tabSew1: "টিভি ৩: সেলাই ১",
-        tabSew2: "টিভি ৪: সেলাই ২",
-        tabLast1: "টিভি ৫: লাস্টিং ১",
-        tabLast2: "টিভি ৬: লাস্টিং ২",
-        tabSew3: "টিভি ৭: সেলাই ৩",
-        tabSew4: "টিভি ৮: সেলাই ৪",
-        lblTitleSec: "ডিসপ্লে টাইটেল / সেকশন",
-        lblCurrHour: "বর্তমান প্রোডাকশন ঘণ্টা",
-        lblShiftName: "শিফটের নাম / নম্বর",
-        lblHeaderStyle: "হেডার লেআউট স্টাইল",
-        lblProdLinesTitle: "প্রোডাকশন লাইন সারি",
-        btnAutoCalc: "👍 অটো ক্যাল্ক এফিসিয়েন্সি ও সেরা লাইন",
-        btnAddLine: "+ লাইন যোগ করুন",
-        thLineNo: "লাইন নং",
-        thHourlyAch: "ঘণ্টাভিত্তিক অর্জন",
-        thNextPlan: "পরবর্তী প্ল্যান লক্ষ্য",
-        thAchEff: "অর্জিত দক্ষতা %",
-        thDefRate: "ত্রুটি হার %",
-        thDownTime: "ডাউন টাইম (মিঃ)",
-        thHourlyBest: "ঘণ্টার সেরা 👍",
-        thAction: "কার্যক্রম",
-        btnSaveBroadcast: "💾 সংরক্ষণ ও ব্রডকাস্ট",
-        btnCloudConfig: "☁️ ক্লাউড কনফিগার",
-        lblNextIn: "পরবর্তী সিঙ্ক",
-        exitFullTv: "ফুল টিভি থেকে বের হন",
-        multiGridTitle: "🖥️ ওএমসি ৮-স্ক্রিন প্রোডাকশন কন্ট্রোল রুম",
-        lbl8TvsActive: "৮ টি টিভি সক্রিয়",
-        filterAll: "সকল ৮",
-        filterDip: "ডিপ (১-২)",
-        filterLasting: "লাস্টিং (৫-৬)",
-        filterSewing: "সেলাই (৩,৪,৭,৮)",
-        loginTitle: "🔐 ওএমসি সিস্টেম অথেন্টিকেশন",
-        loginSub: "এডিটিং সুবিধা আনলক করতে আপনার ইউজার রোল নির্বাচন করুন এবং পাসওয়ার্ড দিন।",
-        lblSelectUserType: "ইউজার টাইপ নির্বাচন করুন:",
-        lblPassword: "পাসওয়ার্ড:",
-        btnLogout: "লক / লগআউট",
-        btnLoginCancel: "বাতিল",
-        btnLoginSubmit: "লগইন",
-        cloudTitle: "☁️ ওএমসি ৮-টিভি রিয়েলটাইম ক্লাউড সিঙ্ক",
-        cloudSub: "সংযুক্ত রিয়েলটাইম ডাটাবেস ইউআরএল:",
-        lblFirebaseUrl: "ফায়ারবেস ডাটাবেস ইউআরএল:",
-        btnSaveConnect: "⚡ সংরক্ষণ ও সংযোগ",
-        btnResetDefault: "ডিফল্ট রিসেট",
-        btnCopyLiveLink: "🔗 লাইভ টিভি লিংক কপি করুন",
-        calTitle: "📅 দৈনিক প্রোডাকশন ফ্লোর ক্যালেন্ডার",
-        tvHeaderProd: "প্রোডাকশন",
-        tvHeaderDIP: "প্রোডাকশন-ডিআইপি",
-        tvHeaderSewing: "প্রোডাকশন সেলাই",
-        tvHeaderLasting: "প্রোডাকশন লাস্টিং",
-        tvHeaderIE: "আইই",
-        tvHeaderQuality: "কোয়ালিটি",
-        tvHeaderMaint: "মেইনটেন্যান্স",
-        tvHeaderOmc: "ওএমসি ফুটওয়্যার",
-        tvSubAchieved: "অর্জিত",
-        tvSubTarget: "লক্ষ্য",
-        tvSubEff: "দক্ষতা",
-        tvSubDefect: "ত্রুটি",
-        tvSubDown: "ডাউন টাইম",
-        tvSubBest: "সেরা লাইন 👍"
-      }
-    };
+    // Default User Database with usernames, passwords, and roles
+    let systemUsers = [
+      { username: 'admin', password: 'Omc@123', role: 'superuser' },
+      { username: 'editor1', password: 'Omc999', role: 'editor' }
+    ];
 
-    function t(key) {
-      return (translations[currentLang] && translations[currentLang][key]) ? translations[currentLang][key] : translations['en'][key] || key;
-    }
-
-    function toggleLanguage() {
-      if (currentUserRole !== 'superuser') {
-        showToast("Only Superusers can switch language!", "warn");
-        return;
-      }
-      currentLang = (currentLang === 'en') ? 'bn' : 'en';
-      localStorage.setItem('omc_app_lang', currentLang);
-      updateUILanguage();
-      showToast(currentLang === 'bn' ? "বাংলা ভাষা সক্রিয় করা হয়েছে!" : "Switched to English language!", "success");
-    }
-
-    function updateUILanguage() {
-      const btn = document.getElementById('langToggleBtn');
-      if (btn) {
-        if (currentUserRole === 'superuser') {
-          btn.classList.remove('hidden');
-          btn.textContent = (currentLang === 'en') ? "বাংলা (Bangla)" : "English";
-        } else {
-          btn.classList.add('hidden');
-        }
-      }
-
-      // Update static UI text labels
-      document.getElementById('navBrandSub').textContent = t('brandSub');
-      document.getElementById('btn-entry').textContent = t('navMasterEntry');
-      document.getElementById('btn-multi').textContent = t('nav8TvGrid');
-      document.getElementById('btn-tv1').textContent = t('navTv1');
-      document.getElementById('btn-tv2').textContent = t('navTv2');
-      document.getElementById('btn-tv3').textContent = t('navTv3');
-      document.getElementById('btn-tv4').textContent = t('navTv4');
-      document.getElementById('btn-tv5').textContent = t('navTv5');
-      document.getElementById('btn-tv6').textContent = t('navTv6');
-      document.getElementById('btn-tv7').textContent = t('navTv7');
-      document.getElementById('btn-tv8').textContent = t('navTv8');
-
-      document.getElementById('entryHeading').innerHTML = `<span>${t('entryHeading')}</span><span id="cloudEntryBadge" style="font-size: 10px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid #10b981; padding: 2px 8px; border-radius: 9999px; cursor: pointer;" onclick="openCloudModal()">● ${currentLang==='bn'?'ক্লাউড লাইভ':'Cloud Live'}</span>`;
-      document.getElementById('entrySubHeading').textContent = t('entrySubHeading');
-      document.getElementById('quickTvLabel').textContent = t('quickTvLabel');
-
-      document.getElementById('labelDate').textContent = t('labelDate');
-      document.getElementById('btn-date-today').textContent = t('btnToday');
-      document.getElementById('btn-date-yesterday').textContent = t('btnYesterday');
-      document.getElementById('btnCalendarHist').textContent = t('btnCalendarHist');
-      document.getElementById('btnCopyYesterday').textContent = t('btnCopyYesterday');
-      document.getElementById('btnResetAll').textContent = t('btnResetAll');
-
-      document.getElementById('tab-btn-1').textContent = t('tabDIP1');
-      document.getElementById('tab-btn-2').textContent = t('tabDIP2');
-      document.getElementById('tab-btn-3').textContent = t('tabSew1');
-      document.getElementById('tab-btn-4').textContent = t('tabSew2');
-      document.getElementById('tab-btn-5').textContent = t('tabLast1');
-      document.getElementById('tab-btn-6').textContent = t('tabLast2');
-      document.getElementById('tab-btn-7').textContent = t('tabSew3');
-      document.getElementById('tab-btn-8').textContent = t('tabSew4');
-
-      document.getElementById('lblTitleSec').textContent = t('lblTitleSec');
-      document.getElementById('lblCurrHour').textContent = t('lblCurrHour');
-      document.getElementById('lblShiftName').textContent = t('lblShiftName');
-      document.getElementById('lblHeaderStyle').textContent = t('lblHeaderStyle');
-      document.getElementById('lblProdLinesTitle').innerHTML = `${t('lblProdLinesTitle')} (<span id="lineRowCount" style="color: #34d399;">3</span> ${currentLang==='bn'?'সক্রিয়':'Active'})`;
-      
-      document.getElementById('btnAutoCalc').textContent = t('btnAutoCalc');
-      document.getElementById('btnAddLine').textContent = t('btnAddLine');
-
-      document.getElementById('thLineNo').textContent = t('thLineNo');
-      document.getElementById('thHourlyAch').textContent = t('thHourlyAch');
-      document.getElementById('thNextPlan').textContent = t('thNextPlan');
-      document.getElementById('thAchEff').textContent = t('thAchEff');
-      document.getElementById('thDefRate').textContent = t('thDefRate');
-      document.getElementById('thDownTime').textContent = t('thDownTime');
-      document.getElementById('thHourlyBest').textContent = t('thHourlyBest');
-      document.getElementById('thAction').textContent = t('thAction');
-
-      document.getElementById('btnSaveBroadcast').textContent = t('btnSaveBroadcast');
-      document.getElementById('btnCloudConfig').textContent = t('btnCloudConfig');
-      document.getElementById('lblNextIn').textContent = t('lblNextIn');
-
-      document.getElementById('btnExitFullTv').textContent = t('exitFullTv');
-      document.getElementById('multiGridTitle').textContent = t('multiGridTitle');
-      document.getElementById('lbl8TvsActive').textContent = t('lbl8TvsActive');
-
-      document.getElementById('btn-filter-all').textContent = t('filterAll');
-      document.getElementById('btn-filter-dip').textContent = t('filterDip');
-      document.getElementById('btn-filter-lasting').textContent = t('filterLasting');
-      document.getElementById('btn-filter-sewing').textContent = t('filterSewing');
-
-      document.getElementById('lblLoginModalTitle').textContent = t('loginTitle');
-      document.getElementById('lblLoginModalSub').textContent = t('loginSub');
-      document.getElementById('lblSelectUserType').textContent = t('lblSelectUserType');
-      document.getElementById('lblPassword').textContent = t('lblPassword');
-      document.getElementById('btnLogout').textContent = t('btnLogout');
-      document.getElementById('btnLoginCancel').textContent = t('btnLoginCancel');
-      document.getElementById('btnLoginSubmit').textContent = t('btnLoginSubmit');
-
-      document.getElementById('lblCloudModalTitle').textContent = t('cloudTitle');
-      document.getElementById('lblCloudModalSub').textContent = t('cloudSub');
-      document.getElementById('lblFirebaseUrl').textContent = t('lblFirebaseUrl');
-      document.getElementById('btnSaveConnect').textContent = t('btnSaveConnect');
-      document.getElementById('btnResetDefault').textContent = t('btnResetDefault');
-      document.getElementById('btnCopyLiveLink').textContent = t('btnCopyLiveLink');
-      document.getElementById('lblCalendarModalTitle').textContent = t('calTitle');
-
-      // Re-render current view to propagate translations onto TV screens
-      if (currentView.startsWith('tv')) renderTVView(currentView);
-      else if (currentView === 'multi') renderMultiView();
-      else loadTabToForm(activeTab);
+    function recordAuditLog(actionDescription) {
+      const timestamp = new Date().toLocaleString();
+      const logEntry = {
+        time: timestamp,
+        user: currentLoggedUsername || 'guest',
+        role: currentUserRole.toUpperCase(),
+        action: actionDescription,
+        date: selectedDate
+      };
+      auditLogs.unshift(logEntry);
+      if (auditLogs.length > 100) auditLogs.pop();
+      localStorage.setItem('omc_audit_logs', JSON.stringify(auditLogs));
     }
 
     function showToast(message, type = 'success') {
@@ -1196,8 +965,10 @@
 
     function openLoginModal() {
       const modal = document.getElementById('loginModal');
+      const userInput = document.getElementById('loginUsernameInput');
       const passInput = document.getElementById('loginPasswordInput');
       const err = document.getElementById('loginErrorMsg');
+      if (userInput) userInput.value = '';
       if (passInput) passInput.value = '';
       if (err) err.style.display = 'none';
       if (modal) modal.classList.remove('hidden');
@@ -1209,41 +980,43 @@
     }
 
     function verifyAndLogin() {
-      const roleSelect = document.getElementById('loginRoleSelect');
+      const userInput = document.getElementById('loginUsernameInput');
       const passInput = document.getElementById('loginPasswordInput');
       const err = document.getElementById('loginErrorMsg');
-      const role = roleSelect.value;
+      const username = userInput.value.trim().toLowerCase();
       const pass = passInput.value.trim();
 
-      let valid = false;
-      if (role === 'superuser' && pass === 'Omc@123') {
-        valid = true;
-      } else if (role === 'editor' && pass === 'Omc999') {
-        valid = true;
-      }
+      const foundUser = systemUsers.find(u => u.username.toLowerCase() === username && u.password === pass);
 
-      if (valid) {
-        currentUserRole = role;
-        sessionStorage.setItem('omc_current_user_role', role);
+      if (foundUser) {
+        currentUserRole = foundUser.role;
+        currentLoggedUsername = foundUser.username;
+        sessionStorage.setItem('omc_current_user_role', foundUser.role);
+        sessionStorage.setItem('omc_current_username', foundUser.username);
+
         updateUserRoleUI();
-        updateUILanguage();
         closeLoginModal();
-        showToast(currentLang === 'bn' ? `${role.toUpperCase()} হিসেবে সফলভাবে লগইন হয়েছে!` : `Logged in successfully as ${role.toUpperCase()}!`, "success");
+        recordAuditLog(`Logged in successfully as ${foundUser.username} (${foundUser.role.toUpperCase()})`);
+        showToast(`Logged in successfully as ${foundUser.username} (${foundUser.role.toUpperCase()})!`, "success");
       } else {
         if (err) {
-          err.textContent = (currentLang === 'bn') ? "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।" : "Incorrect Password! Try Again.";
+          err.textContent = "Incorrect Username or Password! Try Again.";
           err.style.display = 'block';
         }
       }
     }
 
     function logoutSystem() {
+      const prevUser = currentLoggedUsername;
       currentUserRole = 'guest';
-      sessionStorage.setItem('omc_current_user_role', 'guest');
+      currentLoggedUsername = '';
+      sessionStorage.removeItem('omc_current_user_role');
+      sessionStorage.removeItem('omc_current_username');
+
       updateUserRoleUI();
-      updateUILanguage();
       closeLoginModal();
-      showToast(currentLang === 'bn' ? "গেস্ট মোডে লগআউট করা হয়েছে।" : "Logged out to Guest mode.", "info");
+      recordAuditLog(`Logged out from user ${prevUser}`);
+      showToast("Logged out to Guest mode.", "info");
     }
 
     function updateUserRoleUI() {
@@ -1251,32 +1024,138 @@
       if (!label) return;
 
       if (currentUserRole === 'superuser') {
-        label.textContent = currentLang === 'bn' ? "সুপারইউজার 👑" : "Superuser 👑";
+        label.textContent = `Superuser (${currentLoggedUsername}) 👑`;
         label.style.color = "#fde047";
       } else if (currentUserRole === 'editor') {
-        label.textContent = currentLang === 'bn' ? "এডিটর ✏️" : "Editor ✏️";
+        label.textContent = `Editor (${currentLoggedUsername}) ✏️`;
         label.style.color = "#38bdf8";
       } else {
-        label.textContent = currentLang === 'bn' ? "গেস্ট (শুধুমাত্র পঠন)" : "Guest (Read Only)";
+        label.textContent = "Guest (Read Only)";
         label.style.color = "#94a3b8";
       }
 
-      const btnCalendarHist = document.getElementById('btnCalendarHist');
-      const btnCopy = document.getElementById('btnCopyYesterday');
+      const isSuper = (currentUserRole === 'superuser');
+
+      document.querySelectorAll('.superuser-only-control').forEach(el => {
+        el.classList.toggle('hidden', !isSuper);
+      });
+
+      document.querySelectorAll('.superuser-action-btn').forEach(el => {
+        el.classList.toggle('hidden', !isSuper);
+      });
+
       const btnResetAll = document.getElementById('btnResetAll');
-      
-      // Calendar History option remove for Editor and Guest Mode (Only visible for Superuser)
-      if (btnCalendarHist) {
-        btnCalendarHist.style.display = (currentUserRole === 'superuser') ? 'inline-block' : 'none';
+      const btnAddLine = document.getElementById('btnAddLine');
+
+      if (btnResetAll) btnResetAll.style.display = isSuper ? 'inline-block' : 'none';
+      if (btnAddLine) btnAddLine.style.display = isSuper ? 'inline-block' : 'none';
+
+      document.querySelectorAll('.superuser-only-col').forEach(col => {
+        col.style.display = isSuper ? 'table-cell' : 'none';
+      });
+    }
+
+    function openUserManagementModal() {
+      if (currentUserRole !== 'superuser') {
+        showToast("Access restricted to Superusers only!", "warn");
+        openLoginModal();
+        return;
       }
-      if (btnCopy) {
-        btnCopy.style.display = (currentUserRole === 'superuser') ? 'inline-block' : 'none';
-      }
-      if (btnResetAll) {
-        btnResetAll.style.display = (currentUserRole === 'superuser') ? 'inline-block' : 'none';
+      renderUserListTable();
+      document.getElementById('userManagementModal').classList.remove('hidden');
+    }
+
+    function closeUserManagementModal() {
+      document.getElementById('userManagementModal').classList.add('hidden');
+    }
+
+    function renderUserListTable() {
+      const tbody = document.getElementById('userListTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      systemUsers.forEach((u, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong style="color:#fff;">${u.username}</strong></td>
+          <td><span style="background:${u.role==='superuser'?'#7c3aed':'#0284c7'}; color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">${u.role.toUpperCase()}</span></td>
+          <td><code style="color:#34d399;">${u.password}</code></td>
+          <td style="text-align:center;">
+            <div class="flex gap-1 justify-center items-center">
+              <input type="text" id="newpass_${index}" placeholder="New pass" style="width:90px; padding:3px 6px; font-size:11px;">
+              <button onclick="changeUserPassword(${index})" class="floating-btn" style="background:#2563eb; padding:3px 8px; font-size:10px;">Update</button>
+            </div>
+          </td>
+          <td style="text-align:center;">
+            ${u.username.toLowerCase() === 'admin' ? '<span style="font-size:10px; color:var(--text-muted);">System Root</span>' : `<button onclick="deleteSystemUser(${index})" class="floating-btn" style="background:#dc2626; padding:3px 8px; font-size:10px;">🗑️ Delete</button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function createNewUser() {
+      if (currentUserRole !== 'superuser') return;
+      const uInput = document.getElementById('newUsername');
+      const pInput = document.getElementById('newPassword');
+      const rSelect = document.getElementById('newRole');
+
+      const uname = uInput.value.trim();
+      const pass = pInput.value.trim();
+      const role = rSelect.value;
+
+      if (!uname || !pass) {
+        showToast("Please enter both username and password!", "warn");
+        return;
       }
 
-      updateUILanguage();
+      if (systemUsers.some(u => u.username.toLowerCase() === uname.toLowerCase())) {
+        showToast(`User '${uname}' already exists!`, "warn");
+        return;
+      }
+
+      systemUsers.push({ username: uname, password: pass, role: role });
+      localStorage.setItem('omc_system_users', JSON.stringify(systemUsers));
+
+      uInput.value = '';
+      pInput.value = '';
+      renderUserListTable();
+      recordAuditLog(`Created new system user: ${uname} (${role})`);
+      showToast(`User '${uname}' created successfully!`, "success");
+    }
+
+    function changeUserPassword(index) {
+      if (currentUserRole !== 'superuser') return;
+      const passInput = document.getElementById(`newpass_${index}`);
+      if (!passInput) return;
+      const newPass = passInput.value.trim();
+
+      if (!newPass) {
+        showToast("Please enter a valid new password!", "warn");
+        return;
+      }
+
+      const targetUser = systemUsers[index];
+      targetUser.password = newPass;
+      localStorage.setItem('omc_system_users', JSON.stringify(systemUsers));
+      renderUserListTable();
+      recordAuditLog(`Changed password for user: ${targetUser.username}`);
+      showToast(`Password updated successfully for '${targetUser.username}'!`, "success");
+    }
+
+    function deleteSystemUser(index) {
+      if (currentUserRole !== 'superuser') return;
+      const targetUser = systemUsers[index];
+      if (targetUser.username.toLowerCase() === 'admin') {
+        showToast("Cannot delete primary system admin!", "warn");
+        return;
+      }
+
+      systemUsers.splice(index, 1);
+      localStorage.setItem('omc_system_users', JSON.stringify(systemUsers));
+      renderUserListTable();
+      recordAuditLog(`Deleted system user: ${targetUser.username}`);
+      showToast(`User '${targetUser.username}' deleted successfully!`, "success");
     }
 
     function formatDateYMD(date = new Date()) {
@@ -1290,9 +1169,6 @@
       if (!ymdStr) return '';
       const [year, month, day] = ymdStr.split('-');
       const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      if (currentLang === 'bn') {
-        return `${day}-${month}-${year}`;
-      }
       return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
@@ -1301,9 +1177,6 @@
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
       let ampm = hours >= 12 ? 'PM' : 'AM';
-      if (currentLang === 'bn') {
-        ampm = hours >= 12 ? 'অপরাহ্ন' : 'পূর্বাহ্ন';
-      }
       hours = hours % 12;
       hours = hours ? hours : 12;
       const strHours = String(hours).padStart(2, '0');
@@ -1314,7 +1187,7 @@
       tv1: {
         id: 'tv1',
         name: 'DIP Floor 1',
-        title: 'Production-DIP',
+        title: 'Production DIP',
         hasIE: false,
         hour: '5h',
         shift: 'Shift - B',
@@ -1327,7 +1200,7 @@
       tv2: {
         id: 'tv2',
         name: 'DIP Floor 2',
-        title: 'Production-DIP',
+        title: 'Production DIP',
         hasIE: false,
         hour: '8h',
         shift: 'Shift - A',
@@ -1501,8 +1374,8 @@
     function updateCloudStatusUI(connected) {
       const label = document.getElementById('cloudStatusLabel');
       const badge = document.getElementById('cloudEntryBadge');
-      if (label) label.textContent = connected ? (currentLang==='bn' ? "ক্লাউড: লাইভ সিঙ্ক 🟢" : "Cloud: Live Sync 🟢") : (currentLang==='bn' ? "ক্লাউড: লোকাল ক্যাশ ⚪" : "Cloud: Local Cache ⚪");
-      if (badge) badge.textContent = connected ? (currentLang==='bn' ? "● ক্লাউড লাইভ" : "● Cloud Live") : (currentLang==='bn' ? "○ লোকাল মোড" : "○ Local Mode");
+      if (label) label.textContent = connected ? "Cloud: Live Sync 🟢" : "Cloud: Local Cache ⚪";
+      if (badge) badge.textContent = connected ? "● Cloud Live" : "○ Local Mode";
     }
 
     function openCloudModal() {
@@ -1523,7 +1396,7 @@
       localStorage.setItem('andon_firebase_config', raw);
       if (setupFirebaseInstance(raw)) {
         saveHistoryToStorage(true);
-        showToast(currentLang === 'bn' ? "ক্লাউড ডাটাবেসের সাথে সংযুক্ত!" : "Connected to Cloud Database!", "success");
+        showToast("Connected to Cloud Database!", "success");
         closeCloudModal();
       }
     }
@@ -1537,7 +1410,7 @@
     function copyAutoConfigLink() {
       const url = `${window.location.origin}${window.location.pathname}#${currentView}`;
       navigator.clipboard.writeText(url).then(() => {
-        showToast(currentLang === 'bn' ? "লাইভ টিভি লিংক ক্লিপবোর্ডে কপি করা হয়েছে!" : "Live TV URL copied to clipboard!", "success");
+        showToast("Live TV URL copied to clipboard!", "success");
       });
     }
 
@@ -1546,8 +1419,14 @@
         const storedRole = sessionStorage.getItem('omc_current_user_role');
         if (storedRole) currentUserRole = storedRole;
 
-        const storedLang = localStorage.getItem('omc_app_lang');
-        if (storedLang) currentLang = storedLang;
+        const storedUsername = sessionStorage.getItem('omc_current_username');
+        if (storedUsername) currentLoggedUsername = storedUsername;
+
+        const storedUsers = localStorage.getItem('omc_system_users');
+        if (storedUsers) systemUsers = JSON.parse(storedUsers);
+
+        const storedLogs = localStorage.getItem('omc_audit_logs');
+        if (storedLogs) auditLogs = JSON.parse(storedLogs);
 
         const storedHistory = localStorage.getItem('andon_calendar_history_db');
         historyDB = storedHistory ? JSON.parse(storedHistory) : {};
@@ -1573,12 +1452,11 @@
       }
       updateDateControlsUI();
       updateUserRoleUI();
-      updateUILanguage();
     }
 
     function saveHistoryToStorage(broadcast = true) {
       if (currentUserRole === 'guest') {
-        showToast(currentLang === 'bn' ? "গেস্ট মোড: পরিবর্তন সংরক্ষণ করা যাবে না। অনুগ্রহ করে এডিটর বা সুপারইউজার হিসেবে লগইন করুন।" : "Guest mode: Changes cannot be saved. Please login as Editor or Superuser.", "warn");
+        showToast("Guest mode: Changes cannot be saved. Please login.", "warn");
         openLoginModal();
         return;
       }
@@ -1588,6 +1466,8 @@
         localStorage.setItem('andon_calendar_history_db', JSON.stringify(historyDB));
         localStorage.setItem('andon_garment_tv_data', JSON.stringify(appData));
         localStorage.setItem('andon_active_date', selectedDate);
+
+        recordAuditLog(`Saved & Broadcasted updates for TV ${activeTab} (${selectedDate})`);
 
         if (broadcast && channel) {
           channel.postMessage({ type: 'DATA_UPDATED', payload: { activeDate: selectedDate, data: appData, history: historyDB } });
@@ -1640,11 +1520,7 @@
       const isToday = (selectedDate === todayStr);
       const statusText = document.getElementById('dateStatusText');
       if (statusText) {
-        if (currentLang === 'bn') {
-          statusText.textContent = isToday ? `আজকের লাইভ ফ্লোর (${formatDisplayDate(selectedDate)})` : `আর্কাইভ ভিউ: ${formatDisplayDate(selectedDate)}`;
-        } else {
-          statusText.textContent = isToday ? `Today's Live Floor (${formatDisplayDate(selectedDate)})` : `Archive View: ${formatDisplayDate(selectedDate)}`;
-        }
+        statusText.textContent = isToday ? `Today's Live Floor (${formatDisplayDate(selectedDate)})` : `Archive View: ${formatDisplayDate(selectedDate)}`;
       }
     }
 
@@ -1679,7 +1555,7 @@
 
     function copyFromPreviousDay() {
       if (currentUserRole !== 'superuser') {
-        showToast(currentLang === 'bn' ? "শুধুমাত্র সুপারইউজারগণ গতকালের সেটআপ কপি করতে পারবেন।" : "Only Superusers can use Copy Yesterday Setup.", "warn");
+        showToast("Only Superusers can use Copy Yesterday Setup.", "warn");
         return;
       }
       const curr = new Date(selectedDate);
@@ -1687,7 +1563,7 @@
       const prevDateStr = formatDateYMD(curr);
 
       if (!historyDB[prevDateStr]) {
-        showToast(currentLang === 'bn' ? `${formatDisplayDate(prevDateStr)} এর জন্য কোনো রেকর্ড নেই` : `No record for ${formatDisplayDate(prevDateStr)}`, "warn");
+        showToast(`No record for ${formatDisplayDate(prevDateStr)}`, "warn");
         return;
       }
 
@@ -1708,12 +1584,13 @@
       appData = cloned;
       saveHistoryToStorage(true);
       loadTabToForm(activeTab);
-      showToast(currentLang === 'bn' ? `${formatDisplayDate(prevDateStr)} থেকে লক্ষ্য ও লাইন সেটআপ কপি করা হয়েছে!` : `Copied targets & line setup from ${formatDisplayDate(prevDateStr)}!`, "success");
+      recordAuditLog(`Copied targets & setup from previous day ${prevDateStr}`);
+      showToast(`Copied targets & line setup from ${formatDisplayDate(prevDateStr)}!`, "success");
     }
 
     function resetAllEntriesToZero() {
       if (currentUserRole !== 'superuser') {
-        showToast(currentLang === 'bn' ? "শুধুমাত্র সুপারইউজারগণ সব এন্ট্রি ০ এ রিসেট করতে পারবেন।" : "Only Superusers can reset all entries to 0.", "warn");
+        showToast("Only Superusers can reset all entries to 0.", "warn");
         openLoginModal();
         return;
       }
@@ -1737,12 +1614,13 @@
       if (currentView.startsWith('tv')) renderTVView(currentView);
       else if (currentView === 'multi') renderMultiView();
 
-      showToast(currentLang === 'bn' ? "সমস্ত এন্ট্রি সফলভাবে ০ তে রিসেট করা হয়েছে!" : "All entries have been successfully reset to 0!", "success");
+      recordAuditLog(`Reset all entries to 0 for date ${selectedDate}`);
+      showToast("All entries have been successfully reset to 0!", "success");
     }
 
     function openCalendarModal() {
       if (currentUserRole !== 'superuser') {
-        showToast(currentLang === 'bn' ? "ক্যালেন্ডার ইতিহাস শুধুমাত্র সুপারইউজারের জন্য।" : "Calendar History is restricted to Superusers.", "warn");
+        showToast("Calendar History is restricted to Superusers.", "warn");
         return;
       }
       const modal = document.getElementById('calendarModal');
@@ -1753,7 +1631,7 @@
       listContainer.innerHTML = '';
 
       if (dateKeys.length === 0) {
-        listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">${currentLang==='bn'?'এখনো কোনো ইতিহাস রেকর্ড নেই।':'No history records yet.'}</div>`;
+        listContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">No history records yet.</div>`;
       } else {
         dateKeys.forEach(dateStr => {
           const item = document.createElement('div');
@@ -1763,7 +1641,7 @@
               <span style="font-weight:bold; font-size:13px; color:#fff;">${formatDisplayDate(dateStr)}</span>
               <span style="font-size:11px; color:var(--text-muted); margin-left:6px;">(${dateStr})</span>
             </div>
-            <button onclick="loadDateFromHistory('${dateStr}')" class="floating-btn" style="background:#2563eb;">${currentLang==='bn'?'লোড ↗':'Load ↗'}</button>
+            <button onclick="loadDateFromHistory('${dateStr}')" class="floating-btn" style="background:#2563eb;">Load ↗</button>
           `;
           listContainer.appendChild(item);
         });
@@ -1779,6 +1657,54 @@
     function loadDateFromHistory(dateStr) {
       changeActiveDate(dateStr);
       closeCalendarModal();
+      recordAuditLog(`Loaded calendar date ${dateStr} from history`);
+    }
+
+    function openUserHistoryModal() {
+      if (currentUserRole !== 'superuser') {
+        showToast("User History is accessible only by Superusers.", "warn");
+        openLoginModal();
+        return;
+      }
+      const modal = document.getElementById('userHistoryModal');
+      const listContainer = document.getElementById('userHistoryListContainer');
+      if (!modal || !listContainer) return;
+
+      listContainer.innerHTML = '';
+      if (auditLogs.length === 0) {
+        listContainer.innerHTML = `<div style="text-align:center; padding: 25px; color: var(--text-muted);">No user activity logs recorded yet.</div>`;
+      } else {
+        auditLogs.forEach((log, index) => {
+          const item = document.createElement('div');
+          item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:10px 14px; border-radius:8px; border:1px solid var(--border-dark); font-size:12px;";
+          item.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span style="background:#7c3aed; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${log.role}</span>
+                <span style="color:#38bdf8; font-weight:bold;">@${log.user}</span>
+                <strong style="color:#f8fafc;">${log.action}</strong>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">Floor Date: ${log.date}</span>
+            </div>
+            <span style="font-family:monospace; font-size:11px; color:#34d399; background:#020617; padding:4px 8px; border-radius:4px; border:1px solid var(--border-dark);">${log.time}</span>
+          `;
+          listContainer.appendChild(item);
+        });
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeUserHistoryModal() {
+      const modal = document.getElementById('userHistoryModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function clearUserHistory() {
+      if (currentUserRole !== 'superuser') return;
+      auditLogs = [];
+      localStorage.removeItem('omc_audit_logs');
+      openUserHistoryModal();
+      showToast("User audit logs cleared!", "success");
     }
 
     function updateClock() {
@@ -1850,6 +1776,7 @@
       document.getElementById('lineRowCount').textContent = rows.length;
 
       const isReadOnly = (currentUserRole === 'guest');
+      const isSuper = (currentUserRole === 'superuser');
 
       rows.forEach((row, idx) => {
         const tr = document.createElement('tr');
@@ -1861,7 +1788,7 @@
           <td><input type="number" step="0.01" value="${row.defectRate}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'defectRate', parseFloat(this.value)||0)" style="width:75px; color:#fbbf24; font-weight:bold;"> %</td>
           <td><input type="number" value="${row.downTime}" ${isReadOnly ? 'disabled' : ''} onfocus="isUserTyping=true" onblur="isUserTyping=false" onchange="updateRowField(${idx}, 'downTime', parseInt(this.value)||0)" style="width:65px;"> m</td>
           <td style="text-align:center;"><input type="checkbox" ${row.isBest ? 'checked' : ''} ${isReadOnly ? 'disabled' : ''} onchange="setBestLine(${idx}, this.checked)" style="transform:scale(1.3); cursor:pointer;"></td>
-          <td style="text-align:center;"><button onclick="removeRow(${idx})" ${isReadOnly ? 'disabled' : ''} style="background:none; color:#f87171; font-weight:bold; font-size:14px; ${isReadOnly ? 'opacity:0.4;' : ''}">✕</button></td>
+          <td class="superuser-only-col" style="text-align:center; ${isSuper ? '' : 'display:none;'}"><button onclick="removeRow(${idx})" style="background:none; color:#f87171; font-weight:bold; font-size:14px;">✕</button></td>
         `;
         container.appendChild(tr);
       });
@@ -1896,28 +1823,29 @@
     }
 
     function addNewRow() {
-      if (currentUserRole === 'guest') {
+      if (currentUserRole === 'superuser') {
+        const key = `tv${activeTab}`;
+        const prefix = (activeTab === 5 || activeTab === 6) ? 'L-' : '';
+        const rowCount = appData[key].rows.length;
+        appData[key].rows.push({
+          line: `${prefix}${rowCount + 1}`,
+          achievement: 100,
+          target: 150,
+          efficiency: 66.7,
+          defectRate: 2.0,
+          downTime: 0,
+          isBest: false
+        });
+        renderEntryRows(appData[key].rows);
+        autoSave();
+        recordAuditLog(`Added new production line on TV ${activeTab}`);
+      } else {
         openLoginModal();
-        return;
       }
-      const key = `tv${activeTab}`;
-      const prefix = (activeTab === 5 || activeTab === 6) ? 'L-' : '';
-      const rowCount = appData[key].rows.length;
-      appData[key].rows.push({
-        line: `${prefix}${rowCount + 1}`,
-        achievement: 100,
-        target: 150,
-        efficiency: 66.7,
-        defectRate: 2.0,
-        downTime: 0,
-        isBest: false
-      });
-      renderEntryRows(appData[key].rows);
-      autoSave();
     }
 
     function removeRow(index) {
-      if (currentUserRole === 'guest') {
+      if (currentUserRole !== 'superuser') {
         openLoginModal();
         return;
       }
@@ -1926,6 +1854,7 @@
         appData[key].rows.splice(index, 1);
         renderEntryRows(appData[key].rows);
         autoSave();
+        recordAuditLog(`Removed line index ${index} on TV ${activeTab}`);
       }
     }
 
@@ -1957,6 +1886,7 @@
 
       renderEntryRows(rows);
       saveCurrentTabData(true);
+      recordAuditLog(`Auto-calculated efficiency & best line for TV ${activeTab}`);
     }
 
     function autoSave() {
@@ -1979,8 +1909,8 @@
       countdownSec = AUTO_REFRESH_SECONDS;
       if (showFeedback) {
         const badge = document.getElementById('saveStatus');
-        badge.textContent = currentLang === 'bn' ? `✅ সংরক্ষিত! সকল টিভিতে ব্রডকাস্ট হয়েছে` : `✅ Saved! Broadcasted to All TVs`;
-        setTimeout(() => { badge.textContent = currentLang === 'bn' ? "অটো-সিঙ্ক: ৩০সে" : "Auto-Sync: 30s"; }, 2200);
+        badge.textContent = "✅ Saved! Broadcasted to All TVs";
+        setTimeout(() => { badge.textContent = "Auto-Sync: 30s"; }, 2200);
       }
     }
 
@@ -1989,17 +1919,8 @@
       const hasIE = tv.hasIE;
       const rows = tv.rows || [];
       const hour = tv.hour || '8h';
-      let shift = tv.shift || 'Shift - A';
-      if (currentLang === 'bn') {
-        shift = shift.replace('Shift - A', 'শিফট - এ').replace('Shift - B', 'শিফট - বি').replace('Shift - C', 'শিফট - সি').replace('General Shift', 'জেনারেল শিফট');
-      }
-
-      let title = tv.title || 'Production';
-      if (currentLang === 'bn') {
-        title = title.replace('Production-DIP', 'প্রোডাকশন-ডিআইপি')
-                     .replace('Production Sewing', 'প্রোডাকশন সেলাই')
-                     .replace('Production Lasting', 'প্রোডাকশন লাস্টিং');
-      }
+      const shift = tv.shift || 'Shift - A';
+      const title = tv.title || 'Production';
 
       const formattedDate = formatDisplayDate(selectedDate);
       const currentTimeStr = getFormattedTime12h();
@@ -2019,13 +1940,12 @@
       const thumbsBoxSize = isCompact ? '22px' : '6.5vh';
       const thumbsEmojiSize = isCompact ? '13px' : '3.8vh';
 
-      const shortShift = shift.replace('Shift - ', 'S-').replace('শিফট - ', 'শ-');
-      const shortDate = formattedDate;
-      const displayDateStr = isCompact ? shortDate : formattedDate;
-      const maintLabel = currentLang === 'bn' ? 'মেইনটেন্যান্স' : 'Maintenance';
-      const qualityLabel = currentLang === 'bn' ? 'কোয়ালিটি' : 'Quality';
-      const ieLabel = currentLang === 'bn' ? 'আইই' : 'IE';
-      const omcFootwearLabel = currentLang === 'bn' ? 'ওএমসি ফুটওয়্যার' : 'OMC FOOTWEAR';
+      const shortShift = shift.replace('Shift - ', 'S-');
+      const displayDateStr = isCompact ? formattedDate : formattedDate;
+      const maintLabel = 'Maintenance';
+      const qualityLabel = 'Quality';
+      const ieLabel = 'IE';
+      const omcFootwearLabel = 'OMC FOOTWEAR';
 
       let topHeaderCols = '';
 
@@ -2120,23 +2040,15 @@
         `;
       }
 
-      const labelLine = currentLang === 'bn' ? 'লাইন' : 'Line';
-      const labelAchieved = currentLang === 'bn' ? 'অর্জিত' : (isCompact ? 'Achiev' : 'Achieved');
-      const labelTarget = currentLang === 'bn' ? 'লক্ষ্য' : 'Target';
-      const labelEff = currentLang === 'bn' ? 'দক্ষতা %' : (isCompact ? 'Eff %' : 'Efficiency');
-      const labelDefect = currentLang === 'bn' ? 'ত্রুটি' : 'Defect';
-      const labelDown = currentLang === 'bn' ? 'ডাউন (মিঃ)' : (isCompact ? 'Down (m)' : 'Down Time');
-      const labelBest = currentLang === 'bn' ? 'সেরা 👍' : (isCompact ? 'Best 👍' : 'Best Line 👍');
-
       const subHeader = `
         <div class="andon-grid bg-black tv-border-b" style="height: ${subHeaderHeight}; min-height: ${subHeaderHeight}; max-height: ${subHeaderHeight}; flex-shrink: 0; color: #ffffff; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; text-align: center;">
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelLine}</div>
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelAchieved}</div>
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelTarget}</div>
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelEff}</div>
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelDefect}</div>
-          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelDown}</div>
-          <div class="flex items-center justify-center text-center truncate" style="font-size: ${subHeaderFontSize}; padding: 0 2px;">${labelBest}</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">Line</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${isCompact ? 'Achiev' : 'Achieved'}</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">Target</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${isCompact ? 'Eff %' : 'Efficiency'}</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">Defect</div>
+          <div class="flex items-center justify-center text-center truncate" style="border-right: 2px solid rgba(255,255,255,0.4); font-size: ${subHeaderFontSize}; padding: 0 2px;">${isCompact ? 'Down (m)' : 'Down Time'}</div>
+          <div class="flex items-center justify-center text-center truncate" style="font-size: ${subHeaderFontSize}; padding: 0 2px;">${isCompact ? 'Best 👍' : 'Best Line 👍'}</div>
         </div>
       `;
 
